@@ -1,0 +1,40 @@
+# Development setup: builds the dev image and runs `next dev` with live reload.
+#
+#   docker compose watch      # build, start, and sync code changes live
+#   docker compose up --build # (without watch) just build + run
+#
+# For production use docker-compose.prod.yml instead.
+services:
+  localdepo:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: localdepo-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
+      - SESSION_SECRET=${SESSION_SECRET:-dev-secret-change-me}
+      - DATA_DIR=/data
+      # Bridge networking can't auto-detect the LAN, so pin the subnet to scan
+      # during development:
+      # - SCAN_CIDR=192.168.1.0/24
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    develop:
+      watch:
+        # Sync source + assets into the running container (hot reload).
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./public
+          target: /app/public
+        # Restart the dev server when Next config changes.
+        - action: sync+restart
+          path: ./next.config.js
+          target: /app/next.config.js
+        # Rebuild the image when dependencies change.
+        - action: rebuild
+          path: ./package.json
