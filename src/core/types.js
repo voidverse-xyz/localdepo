@@ -7,7 +7,6 @@
  * A service plugin definition (one per file in core/services/catalog).
  * @typedef {Object} ServiceDefinition
  * @property {string} id - Stable unique key, e.g. "jellyfin".
- * @property {string} category - Grouping label, e.g. "Media".
  * @property {string} [icon] - Optional icon URL or data URI.
  * @property {() => string} getName - Human-readable name.
  * @property {() => number[]} getDefaultPorts - Ports to probe during discovery.
@@ -35,7 +34,6 @@
  * @property {string} name
  * @property {string} url - Fully-qualified URL opened on click.
  * @property {string} [icon]
- * @property {string} [category]
  * @property {('discovered'|'manual')} source
  * @property {boolean} enabled
  * @property {string} [definitionId] - Catalog plugin id, if discovered.

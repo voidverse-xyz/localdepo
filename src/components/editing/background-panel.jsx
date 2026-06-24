@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import Modal from '@/components/ui/modal.jsx';
 import { STRINGS, IMAGE_FIT } from '@/core/constants.js';
 import { listEffects, getEffect } from '@/components/backgrounds/effects/registry.js';
@@ -73,6 +74,9 @@ export default function BackgroundPanel({ background, onChange, onSave, onClose 
   const setEffectOption = (key, value) =>
     update('effect', { options: { ...bg.effect.options, [key]: value } });
 
+  const resetEffect = () =>
+    update('effect', { options: { ...(getEffect(bg.effect.type)?.defaults || {}) } });
+
   return (
     <Modal
       title={STRINGS.SETTINGS}
@@ -131,22 +135,21 @@ export default function BackgroundPanel({ background, onChange, onSave, onClose 
             ))}
           </select>
         </label>
-        <Slider
-          label="Density"
-          min={0}
-          max={1}
-          step={0.05}
-          value={bg.effect.options?.density ?? 0.6}
-          onChange={(v) => setEffectOption('density', v)}
-        />
-        <Slider
-          label="Speed"
-          min={0}
-          max={3}
-          step={0.1}
-          value={bg.effect.options?.speed ?? 1}
-          onChange={(v) => setEffectOption('speed', v)}
-        />
+        {/* Controls are generated from the effect's own settings (in its catalog file). */}
+        {(getEffect(bg.effect.type)?.settings || []).map((s) => (
+          <Slider
+            key={s.key}
+            label={s.label}
+            min={s.min}
+            max={s.max}
+            step={s.step}
+            value={bg.effect.options?.[s.key] ?? s.default}
+            onChange={(v) => setEffectOption(s.key, v)}
+          />
+        ))}
+        <button type="button" className="btn btn--ghost reset-btn" onClick={resetEffect}>
+          <RotateCcw size={14} /> {STRINGS.RESET_EFFECT}
+        </button>
       </Section>
 
       <Section label="Readability overlay" enabled={bg.overlay.enabled} onToggle={(v) => update('overlay', { enabled: v })}>

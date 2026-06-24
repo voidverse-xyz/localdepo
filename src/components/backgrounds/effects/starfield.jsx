@@ -2,7 +2,9 @@
 
 import { useMemo } from 'react';
 import { useCanvasAnimation } from '@/hooks/use-canvas-animation.js';
-import { clamp, rand } from '@/lib/math.js';
+import { rand } from '@/lib/math.js';
+import { EFFECT } from '@/core/constants.js';
+import { defineEffect } from './effect-definition.js';
 
 function makeStar(width, y) {
   return {
@@ -15,10 +17,9 @@ function makeStar(width, y) {
   };
 }
 
-/** Slowly drifting, twinkling starfield. */
-export default function Starfield({ options = {} }) {
-  const density = clamp(options.density ?? 0.6, 0, 1);
-  const speed = clamp(options.speed ?? 1, 0, 5);
+/** Slowly drifting, twinkling starfield. Options are supplied by its settings. */
+function Starfield({ options }) {
+  const { density = 0.6, speed = 1 } = options;
   const state = useMemo(() => ({ stars: [], w: 0, h: 0 }), []);
 
   const ref = useCanvasAnimation(
@@ -52,3 +53,13 @@ export default function Starfield({ options = {} }) {
 
   return <canvas ref={ref} className="bg-canvas" />;
 }
+
+export default defineEffect({
+  key: EFFECT.STARFIELD,
+  label: 'Space stars',
+  component: Starfield,
+  settings: [
+    { key: 'density', label: 'Density', min: 0, max: 1, step: 0.05, default: 0.6 },
+    { key: 'speed', label: 'Speed', min: 0, max: 3, step: 0.1, default: 1 },
+  ],
+});

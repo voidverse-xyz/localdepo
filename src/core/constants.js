@@ -91,15 +91,26 @@ export const API = {
   UPLOAD: '/api/upload',
 };
 
-/** Responsive grid configuration shared by custom + grid modes. */
+/** Grid configuration (single controlled layout, free placement). */
 export const GRID = {
-  BREAKPOINTS: { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 },
-  COLS: { lg: 12, md: 10, sm: 8, xs: 4, xxs: 2 },
+  // 10 columns so a default 5-column tile is 50% of the grid width (≈ 50% of
+  // the viewport, up to the MAX_WIDTH cap).
+  COLUMNS: 10,
   ROW_HEIGHT: 84,
   MARGIN: [14, 14],
-  DEFAULT_TILE: { w: 2, h: 2 },
+  DEFAULT_TILE: { w: 5, h: 2 },
   MIN_TILE: { minW: 1, minH: 1 },
+  // Cap the grid width so tiles shrink on smaller screens but never grow past
+  // this on larger ones (column width = MAX_WIDTH / COLUMNS at most).
+  MAX_WIDTH: 1120,
 };
+
+/** UI theme keys. */
+export const THEME = {
+  DARK: 'dark',
+  LIGHT: 'light',
+};
+export const THEMES = Object.values(THEME);
 
 /** Upload constraints for background images. */
 export const UPLOAD = {
@@ -116,21 +127,33 @@ export const STRINGS = {
   DELETE: 'Delete',
   SAVE: 'Save',
   CANCEL: 'Cancel',
+  CLOSE: 'Close',
   SCAN_NOW: 'Scan network',
   SCANNING: 'Scanning…',
   SETTINGS: 'Background',
+  RESET_EFFECT: 'Reset effect',
+  TOGGLE_THEME: 'Toggle light/dark',
+  SHOW_CONTROLS: 'Controls',
   UNLOCK: 'Unlock',
   PASSWORD_TITLE: 'Admin password',
   PASSWORD_PLACEHOLDER: 'Enter admin password',
   WRONG_PASSWORD: 'Incorrect password',
   NO_SERVICES: 'No services yet. Scan the network or add one.',
+  GRID_EMPTY: "No services on the grid yet. Switch to the list and use 'Add to grid'.",
+  SEARCH: 'Search services…',
+  ADD_TO_GRID: 'Add to grid',
+  REMOVE_FROM_GRID: 'Remove from grid',
   VIEW_CUSTOM: 'Custom',
   VIEW_GRID: 'Grid',
   VIEW_LIST: 'List',
   FIELD_NAME: 'Name',
   FIELD_URL: 'URL',
-  FIELD_ICON: 'Icon URL',
-  FIELD_CATEGORY: 'Category',
+  FIELD_ICON: 'Icon',
+  FIELD_BG_COLOR: 'Background color',
+  FIELD_FG_COLOR: 'Text color',
+  COLORS_DEFAULT: 'Default',
+  UPLOAD_ICON: 'Upload icon',
+  UPLOADING: 'Uploading…',
   CONFIRM_DELETE: 'Delete this service?',
 };
 

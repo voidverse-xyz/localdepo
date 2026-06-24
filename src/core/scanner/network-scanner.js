@@ -5,6 +5,15 @@ import { getAllDefinitions, getAllPorts } from '../services/registry.js';
 import { buildUrl } from '../services/service-definition.js';
 import { SCAN, SERVICE_SOURCE } from '../constants.js';
 
+/** Default icon for a discovered service: the site's favicon at its origin. */
+function faviconFor(url) {
+  try {
+    return `${new URL(url).origin}/favicon.ico`;
+  } catch {
+    return '';
+  }
+}
+
 /** Run `worker` over `items` with a bounded number of concurrent runners. */
 async function pool(items, worker, concurrency) {
   const results = [];
@@ -43,13 +52,16 @@ export async function scanNetwork({ targets, ports, concurrency = SCAN.CONCURREN
       if (!result.open) return null;
       const def = identify(result, definitions);
       if (!def) return null;
+      const url = buildUrl(def, host, port);
       return {
         id: `${def.id}-${host}-${port}`,
         definitionId: def.id,
         name: def.getName(),
-        url: buildUrl(def, host, port),
-        icon: def.icon,
-        category: def.category,
+        url,
+        // Prefer the catalog icon; otherwise default to the service's own
+        // favicon (derived from its URL). ServiceIcon falls back to a letter
+        // avatar if that favicon fails to load.
+        icon: def.icon || faviconFor(url),
         source: SERVICE_SOURCE.DISCOVERED,
         enabled: true,
       };

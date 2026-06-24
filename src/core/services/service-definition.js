@@ -11,7 +11,6 @@ import { SCHEME } from '../constants.js';
  * @param {('http'|'https')} [spec.scheme]
  * @param {string} [spec.path]
  * @param {string} [spec.icon]
- * @param {string} [spec.category]
  * @param {(probe: import('../types.js').ProbeResult) => boolean} spec.match
  * @returns {import('../types.js').ServiceDefinition}
  */
@@ -23,13 +22,11 @@ export function defineService(spec) {
     scheme = SCHEME.HTTP,
     path = '',
     icon = '',
-    category = 'General',
     match,
   } = spec;
 
   return {
     id,
-    category,
     icon,
     getName: () => name,
     getDefaultPorts: () => (Array.isArray(ports) ? ports : [ports]),

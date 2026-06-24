@@ -1,0 +1,59 @@
+# Fake services for development, so auto-discovery has something to find.
+# Each fixture serves a tiny page that fingerprints as the real service.
+# Layer it on top of the dev compose:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.fixtures.yml up -d --build
+#
+# Then in the UI: Edit (pencil) -> Scan network. The fakes appear as tiles.
+# (Their links use the docker-internal IP, so they won't open in a browser —
+#  they're only here to exercise discovery.)
+networks:
+  depo_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+services:
+  localdepo:
+    environment:
+      - SCAN_CIDR=172.30.0.0/24
+    networks:
+      - default
+      - depo_net
+
+  fake-jellyfin:
+    image: hashicorp/http-echo
+    command: ["-listen=:8096", "-text=<html><head><title>Jellyfin</title></head><body>Jellyfin Media Server</body></html>"]
+    networks: [depo_net]
+    restart: unless-stopped
+
+  fake-plex:
+    image: hashicorp/http-echo
+    command: ["-listen=:32400", "-text=Plex Media Server"]
+    networks: [depo_net]
+    restart: unless-stopped
+
+  fake-sonarr:
+    image: hashicorp/http-echo
+    command: ["-listen=:8989", "-text=<html><title>Sonarr</title></html>"]
+    networks: [depo_net]
+    restart: unless-stopped
+
+  fake-radarr:
+    image: hashicorp/http-echo
+    command: ["-listen=:7878", "-text=<html><title>Radarr</title></html>"]
+    networks: [depo_net]
+    restart: unless-stopped
+
+  fake-prowlarr:
+    image: hashicorp/http-echo
+    command: ["-listen=:9696", "-text=<html><title>Prowlarr</title></html>"]
+    networks: [depo_net]
+    restart: unless-stopped
+
+  fake-qbittorrent:
+    image: hashicorp/http-echo
+    command: ["-listen=:8080", "-text=<html><title>qBittorrent WebUI</title></html>"]
+    networks: [depo_net]
+    restart: unless-stopped

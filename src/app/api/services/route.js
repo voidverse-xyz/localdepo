@@ -6,7 +6,7 @@ import { pick } from '@/lib/object.js';
 
 export const dynamic = 'force-dynamic';
 
-const EDITABLE = ['name', 'url', 'icon', 'category', 'enabled'];
+const EDITABLE = ['name', 'url', 'icon', 'enabled', 'bg', 'fg'];
 
 export async function GET() {
   const config = await readConfig();
@@ -29,7 +29,8 @@ export async function POST(request) {
     name: body.name,
     url: body.url,
     icon: body.icon || '',
-    category: body.category || 'General',
+    bg: body.bg || '',
+    fg: body.fg || '',
     source: SERVICE_SOURCE.MANUAL,
     enabled: true,
   };
@@ -70,6 +71,11 @@ export async function DELETE(request) {
   const config = await updateConfig((cfg) => {
     const service = cfg.services.find((s) => s.id === id);
     cfg.services = cfg.services.filter((s) => s.id !== id);
+    // Drop the service's grid tile too, so deletion never leaves an orphaned
+    // entry in layout.grid.
+    if (Array.isArray(cfg.layout?.grid)) {
+      cfg.layout.grid = cfg.layout.grid.filter((g) => g.i !== id);
+    }
     if (service?.source === SERVICE_SOURCE.DISCOVERED && !cfg.dismissed.includes(id)) {
       cfg.dismissed.push(id);
     }

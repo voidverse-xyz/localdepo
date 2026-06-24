@@ -2,7 +2,9 @@
 
 import { useMemo } from 'react';
 import { useCanvasAnimation } from '@/hooks/use-canvas-animation.js';
-import { clamp, rand } from '@/lib/math.js';
+import { rand } from '@/lib/math.js';
+import { EFFECT } from '@/core/constants.js';
+import { defineEffect } from './effect-definition.js';
 
 function makeDrop(width, y) {
   return {
@@ -14,10 +16,13 @@ function makeDrop(width, y) {
   };
 }
 
-/** Diagonal falling rain. */
-export default function Rain({ options = {} }) {
-  const density = clamp(options.density ?? 0.6, 0, 1);
-  const speed = clamp(options.speed ?? 1, 0, 5);
+/**
+ * Falling rain. Wind controls the horizontal slant, centered at 1.5 = straight
+ * down. Below 1.5 it leans one way (0 = full opposite slant); above 1.5 the other.
+ */
+function Rain({ options }) {
+  const { density = 0.6, speed = 1, wind = 1.5 } = options;
+  const slant = wind - 1.5;
   const state = useMemo(() => ({ drops: [], w: 0, h: 0 }), []);
 
   const ref = useCanvasAnimation(
@@ -38,16 +43,27 @@ export default function Rain({ options = {} }) {
       ctx.lineWidth = 1;
       for (const d of state.drops) {
         d.y += d.v * speed * dt * 60;
-        d.x += d.vx * speed * dt * 60;
+        d.x += d.vx * slant * speed * dt * 60;
         if (d.y > height) Object.assign(d, makeDrop(width, 0));
         ctx.beginPath();
         ctx.moveTo(d.x, d.y);
-        ctx.lineTo(d.x - d.vx * d.len, d.y - d.len);
+        ctx.lineTo(d.x - d.vx * slant * d.len, d.y - d.len);
         ctx.stroke();
       }
     },
-    [density, speed],
+    [density, speed, slant],
   );
 
   return <canvas ref={ref} className="bg-canvas" />;
 }
+
+export default defineEffect({
+  key: EFFECT.RAIN,
+  label: 'Rain',
+  component: Rain,
+  settings: [
+    { key: 'density', label: 'Density', min: 0, max: 1, step: 0.05, default: 0.6 },
+    { key: 'speed', label: 'Speed', min: 0, max: 3, step: 0.1, default: 1 },
+    { key: 'wind', label: 'Wind', min: 0, max: 3, step: 0.1, default: 1.5 },
+  ],
+});

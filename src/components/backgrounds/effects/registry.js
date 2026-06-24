@@ -1,21 +1,26 @@
 /**
- * Background effect registry. To add an effect: create a component file in this
- * folder that takes an `options` prop, then add one entry here. The settings
- * panel and effect layer pick it up automatically.
+ * Background effect registry. To add an effect: create a file in this folder
+ * that default-exports `defineEffect({...})` (component + its settings as
+ * values), then add a single import + entry below.
  */
-import { EFFECT } from '@/core/constants.js';
-import Starfield from './starfield.jsx';
-import Rain from './rain.jsx';
+import starfield from './starfield.jsx';
+import rain from './rain.jsx';
 
 const EFFECTS = {
-  [EFFECT.STARFIELD]: { label: 'Space stars', component: Starfield, defaults: { density: 0.6, speed: 1 } },
-  [EFFECT.RAIN]: { label: 'Rain', component: Rain, defaults: { density: 0.6, speed: 1 } },
+  [starfield.key]: starfield,
+  [rain.key]: rain,
 };
 
-export function getEffect(type) {
-  return EFFECTS[type] || null;
+export function getEffect(key) {
+  return EFFECTS[key] || null;
 }
 
 export function listEffects() {
-  return Object.entries(EFFECTS).map(([key, value]) => ({ key, label: value.label }));
+  return Object.values(EFFECTS).map((e) => ({ key: e.key, label: e.label }));
+}
+
+/** Default option values for an effect, derived from its settings descriptors. */
+export function getEffectDefaults(key) {
+  const effect = EFFECTS[key];
+  return effect ? { ...effect.defaults } : {};
 }

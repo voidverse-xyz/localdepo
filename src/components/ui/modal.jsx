@@ -1,6 +1,8 @@
 'use client';
 
-/** Reusable modal dialog. Click outside or the ✕ to close. */
+import { X } from 'lucide-react';
+
+/** Reusable modal dialog. Click outside or the close button to close. */
 export default function Modal({ title, children, footer, onClose }) {
   return (
     <div className="modal__overlay" onMouseDown={onClose}>
@@ -8,7 +10,7 @@ export default function Modal({ title, children, footer, onClose }) {
         <div className="modal__header">
           <h2 className="modal__title">{title}</h2>
           <button className="modal__x" onClick={onClose} aria-label="Close">
-            ✕
+            <X size={18} />
           </button>
         </div>
         <div className="modal__body">{children}</div>

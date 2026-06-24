@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { Upload } from 'lucide-react';
 import Modal from '@/components/ui/modal.jsx';
 import { STRINGS } from '@/core/constants.js';
+import { api } from '@/lib/api.js';
 
 /** Add (initial = {}) or edit (initial = service) a service. */
 export default function ServiceEditDialog({ initial, onSave, onCancel, onDelete }) {
@@ -11,10 +13,27 @@ export default function ServiceEditDialog({ initial, onSave, onCancel, onDelete 
     name: initial?.name || '',
     url: initial?.url || '',
     icon: initial?.icon || '',
-    category: initial?.category || '',
+    bg: initial?.bg || '',
+    fg: initial?.fg || '',
   });
+  const [uploading, setUploading] = useState(false);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const setValue = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+
+  const onIconUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const result = await api.uploadImage(file);
+      setForm((f) => ({ ...f, icon: result.path }));
+    } catch {
+      /* ignore */
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const save = () => {
     if (!form.name.trim() || !form.url.trim()) return;
@@ -50,14 +69,68 @@ export default function ServiceEditDialog({ initial, onSave, onCancel, onDelete 
         {STRINGS.FIELD_URL}
         <input className="field" value={form.url} onChange={set('url')} placeholder="http://host:port" />
       </label>
-      <label className="form-label">
+      <div className="form-label">
         {STRINGS.FIELD_ICON}
-        <input className="field" value={form.icon} onChange={set('icon')} placeholder="https://…/icon.png" />
-      </label>
-      <label className="form-label">
-        {STRINGS.FIELD_CATEGORY}
-        <input className="field" value={form.category} onChange={set('category')} />
-      </label>
+        <div className="icon-row">
+          {form.icon ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="icon-preview" src={form.icon} alt="" />
+          ) : (
+            <span className="icon-preview icon-preview--empty" />
+          )}
+          <input className="field" value={form.icon} onChange={set('icon')} placeholder="https://…/icon.png" />
+          <label className="btn btn--ghost icon-upload">
+            <Upload size={14} /> {uploading ? STRINGS.UPLOADING : STRINGS.UPLOAD_ICON}
+            <input type="file" accept="image/*" hidden onChange={onIconUpload} />
+          </label>
+        </div>
+      </div>
+
+      <div className="color-row">
+        <ColorField
+          label={STRINGS.FIELD_BG_COLOR}
+          fallback="#141a26"
+          value={form.bg}
+          onChange={(v) => setValue('bg', v)}
+        />
+        <ColorField
+          label={STRINGS.FIELD_FG_COLOR}
+          fallback="#e8edf5"
+          value={form.fg}
+          onChange={(v) => setValue('fg', v)}
+        />
+      </div>
     </Modal>
+  );
+}
+
+/**
+ * A single colour control: a swatch/picker plus a "Default" reset. An empty
+ * `value` means "use the theme default", so the picker shows `fallback` but the
+ * stored value stays empty until the user actively picks a colour.
+ */
+function ColorField({ label, value, fallback, onChange }) {
+  const isSet = Boolean(value);
+  return (
+    <div className="color-field">
+      <span className="color-field__label">{label}</span>
+      <div className="color-field__controls">
+        <input
+          type="color"
+          className="color-swatch"
+          value={isSet ? value : fallback}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+        />
+        <button
+          type="button"
+          className="btn btn--ghost color-field__reset"
+          onClick={() => onChange('')}
+          disabled={!isSet}
+        >
+          {STRINGS.COLORS_DEFAULT}
+        </button>
+      </div>
+    </div>
   );
 }
