@@ -107,6 +107,7 @@ export const GRID = {
 
 /** UI theme keys. */
 export const THEME = {
+  SYSTEM: 'system', // follow the browser's prefers-color-scheme
   DARK: 'dark',
   LIGHT: 'light',
 };
@@ -151,6 +152,7 @@ export const STRINGS = {
   FIELD_ICON: 'Icon',
   FIELD_BG_COLOR: 'Background color',
   FIELD_FG_COLOR: 'Text color',
+  FIELD_BG_OPACITY: 'Background opacity',
   COLORS_DEFAULT: 'Default',
   UPLOAD_ICON: 'Upload icon',
   UPLOADING: 'Uploading…',

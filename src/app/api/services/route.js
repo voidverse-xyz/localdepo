@@ -3,10 +3,17 @@ import { readConfig, updateConfig } from '@/core/storage/config-store.js';
 import { json, badRequest, isAuthed, unauthorized } from '@/lib/server/api.js';
 import { SERVICE_SOURCE } from '@/core/constants.js';
 import { pick } from '@/lib/object.js';
+import { clamp } from '@/lib/math.js';
 
 export const dynamic = 'force-dynamic';
 
-const EDITABLE = ['name', 'url', 'icon', 'enabled', 'bg', 'fg'];
+const EDITABLE = ['name', 'url', 'icon', 'enabled', 'bg', 'fg', 'bgOpacity'];
+
+/** Coerce a client-supplied background opacity to an integer percent in [0, 100]. */
+function normalizeOpacity(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.round(clamp(n, 0, 100)) : 100;
+}
 
 export async function GET() {
   const config = await readConfig();
@@ -31,6 +38,7 @@ export async function POST(request) {
     icon: body.icon || '',
     bg: body.bg || '',
     fg: body.fg || '',
+    bgOpacity: normalizeOpacity(body.bgOpacity),
     source: SERVICE_SOURCE.MANUAL,
     enabled: true,
   };
@@ -51,11 +59,14 @@ export async function PUT(request) {
   }
   if (!body?.id) return badRequest('id is required');
 
+  const updates = pick(body, EDITABLE);
+  if (updates.bgOpacity !== undefined) updates.bgOpacity = normalizeOpacity(updates.bgOpacity);
+
   let found = false;
   const config = await updateConfig((cfg) => {
     const service = cfg.services.find((s) => s.id === body.id);
     if (!service) return;
-    Object.assign(service, pick(body, EDITABLE));
+    Object.assign(service, updates);
     found = true;
   });
   if (!found) return badRequest('service not found');

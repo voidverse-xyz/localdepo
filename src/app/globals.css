@@ -1,4 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark is the base theme. */
 :root {
+  color-scheme: dark;
   --color-text: #e8edf5;
   --color-text-dim: #9aa7bd;
   --color-surface: rgba(20, 26, 38, 0.72);
@@ -13,8 +19,10 @@
   --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Light theme overrides (applied via data-theme="light" on <html>). */
+/* Light theme tokens. Applied when the user picks Light explicitly
+   (data-theme="light")... */
 [data-theme='light'] {
+  color-scheme: light;
   --color-text: #1a2230;
   --color-text-dim: #5c6779;
   --color-surface: rgba(255, 255, 255, 0.78);
@@ -25,8 +33,33 @@
   --shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
 }
 
+/* ...and when following the system (no data-theme set) and it prefers light. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --color-text: #1a2230;
+    --color-text-dim: #5c6779;
+    --color-surface: rgba(255, 255, 255, 0.78);
+    --color-surface-solid: #ffffff;
+    --color-border: rgba(0, 0, 0, 0.12);
+    --color-accent: #2f6bff;
+    --color-danger: #d83a48;
+    --shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+  }
+}
+
 * {
   box-sizing: border-box;
+}
+/* Tailwind's `border` utility sets width but not style, and Preflight (which
+   normally supplies the default) is off during the migration. Mirror Preflight's
+   rule exactly: zero width + solid style, so an element only shows a border when
+   one is explicitly added. Existing `border` shorthands override both. */
+*,
+::before,
+::after {
+  border-width: 0;
+  border-style: solid;
 }
 
 html,
@@ -303,70 +336,6 @@ button {
   to {
     transform: rotate(360deg);
   }
-}
-
-/* ---------- Tile ---------- */
-.tile {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-.tile__inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(8px);
-  text-align: center;
-  transition: border-color 0.15s ease, transform 0.15s ease;
-}
-@media (hover: hover) {
-  .tile__inner:hover {
-    border-color: var(--color-accent);
-    transform: translateY(-2px);
-  }
-}
-.tile--edit .tile__inner {
-  border-style: dashed;
-  cursor: grab;
-}
-.tile__name {
-  font-size: 14px;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
-}
-.tile__actions {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  display: flex;
-  gap: 4px;
-}
-.tile__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-solid);
-  color: var(--color-text);
-  line-height: 1;
-}
-.tile__btn--danger {
-  color: var(--color-danger);
 }
 
 /* ---------- Icon ---------- */
@@ -648,6 +617,17 @@ button {
 .slider__label em {
   font-style: normal;
   color: var(--color-text);
+}
+.slider input {
+  width: 100%;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+.slider:has(input:disabled) {
+  opacity: 0.5;
+}
+.slider input:disabled {
+  cursor: default;
 }
 
 /* ---------- Background canvas ---------- */

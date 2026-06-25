@@ -31,7 +31,9 @@ export default function Dashboard({ initialConfig }) {
   const layoutRef = useRef(layout);
   layoutRef.current = layout;
   const [background, setBackground] = useState(initialConfig.background);
-  const [theme, setTheme] = useState(initialConfig.ui?.theme || THEME.DARK);
+  // 'system' (default) follows the OS preference; 'dark'/'light' force a theme.
+  const [theme, setTheme] = useState(initialConfig.ui?.theme || THEME.SYSTEM);
+  const [systemDark, setSystemDark] = useState(true); // matched on the client below
 
   const [authed, setAuthed] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -59,9 +61,24 @@ export default function Dashboard({ initialConfig }) {
     api.checkAuth().then((r) => setAuthed(Boolean(r?.authed))).catch(() => {});
   }, []);
 
-  // Apply the theme to <html> so CSS variables switch.
+  // Track the OS colour-scheme so the toggle icon can reflect what 'system' resolves to.
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    setSystemDark(mq.matches);
+    const onChange = (e) => setSystemDark(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  // What the current theme resolves to (system -> the OS preference).
+  const effectiveTheme = theme === THEME.SYSTEM ? (systemDark ? THEME.DARK : THEME.LIGHT) : theme;
+
+  // Drive the <html data-theme> attribute. In 'system' mode we leave it off so
+  // the CSS prefers-color-scheme media query takes over (no flash, no JS needed).
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === THEME.SYSTEM) root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', theme);
   }, [theme]);
 
   // --- auth gate ---
@@ -118,13 +135,13 @@ export default function Dashboard({ initialConfig }) {
   );
 
   // --- theme (persisted in ui prefs when unlocked) ---
+  // Toggling picks the opposite of whatever is showing now, as an explicit
+  // override (so it sticks even if the OS preference later changes).
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const next = prev === THEME.DARK ? THEME.LIGHT : THEME.DARK;
-      if (authed) api.saveLayout({ ui: { theme: next } }).catch(() => {});
-      return next;
-    });
-  }, [authed]);
+    const next = effectiveTheme === THEME.DARK ? THEME.LIGHT : THEME.DARK;
+    setTheme(next);
+    if (authed) api.saveLayout({ ui: { theme: next } }).catch(() => {});
+  }, [effectiveTheme, authed]);
 
   // The sidebar (and so every control) is unlocked behind the password, so by
   // the time a view toggle happens the session is authed and the choice saves.
@@ -252,7 +269,7 @@ export default function Dashboard({ initialConfig }) {
         onScan={runScan}
         onBackground={() => setBgPanelOpen(true)}
         scanning={scanning}
-        theme={theme}
+        theme={effectiveTheme}
         onToggleTheme={toggleTheme}
       />
 
@@ -296,6 +313,7 @@ export default function Dashboard({ initialConfig }) {
       {dialog ? (
         <ServiceEditDialog
           initial={dialog}
+          theme={effectiveTheme}
           onSave={saveService}
           onCancel={closeDialog}
           onDelete={deleteService}

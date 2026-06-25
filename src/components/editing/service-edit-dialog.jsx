@@ -3,11 +3,17 @@
 import { useState } from 'react';
 import { Upload } from 'lucide-react';
 import Modal from '@/components/ui/modal.jsx';
-import { STRINGS } from '@/core/constants.js';
+import Slider from '@/components/ui/slider.jsx';
+import { STRINGS, THEME } from '@/core/constants.js';
 import { api } from '@/lib/api.js';
 
 /** Add (initial = {}) or edit (initial = service) a service. */
-export default function ServiceEditDialog({ initial, onSave, onCancel, onDelete }) {
+export default function ServiceEditDialog({ initial, theme, onSave, onCancel, onDelete }) {
+  // A service with no custom colour follows the theme surface/text, so the
+  // "unset" swatches preview those defaults for the active (incl. system) theme.
+  const isLight = theme === THEME.LIGHT;
+  const bgFallback = isLight ? '#ffffff' : '#141a26';
+  const fgFallback = isLight ? '#1a2230' : '#e8edf5';
   const isEdit = Boolean(initial?.id);
   const [form, setForm] = useState({
     name: initial?.name || '',
@@ -15,11 +21,17 @@ export default function ServiceEditDialog({ initial, onSave, onCancel, onDelete 
     icon: initial?.icon || '',
     bg: initial?.bg || '',
     fg: initial?.fg || '',
+    bgOpacity: initial?.bgOpacity ?? 100,
   });
   const [uploading, setUploading] = useState(false);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const setValue = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+
+  // Clearing the background colour also resets its opacity, so a stale value
+  // can't linger on a service that no longer has a custom background.
+  const setBg = (value) =>
+    setForm((f) => ({ ...f, bg: value, bgOpacity: value ? f.bgOpacity : 100 }));
 
   const onIconUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -89,17 +101,27 @@ export default function ServiceEditDialog({ initial, onSave, onCancel, onDelete 
       <div className="color-row">
         <ColorField
           label={STRINGS.FIELD_BG_COLOR}
-          fallback="#141a26"
+          fallback={bgFallback}
           value={form.bg}
-          onChange={(v) => setValue('bg', v)}
+          onChange={setBg}
         />
         <ColorField
           label={STRINGS.FIELD_FG_COLOR}
-          fallback="#e8edf5"
+          fallback={fgFallback}
           value={form.fg}
           onChange={(v) => setValue('fg', v)}
         />
       </div>
+
+      <Slider
+        label={STRINGS.FIELD_BG_OPACITY}
+        min={0}
+        max={100}
+        value={form.bgOpacity}
+        suffix="%"
+        disabled={!form.bg}
+        onChange={(v) => setValue('bgOpacity', v)}
+      />
     </Modal>
   );
 }

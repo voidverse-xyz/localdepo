@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import Modal from '@/components/ui/modal.jsx';
+import Slider from '@/components/ui/slider.jsx';
 import { STRINGS, IMAGE_FIT } from '@/core/constants.js';
 import { listEffects, getEffect } from '@/components/backgrounds/effects/registry.js';
 import { api } from '@/lib/api.js';
@@ -17,26 +18,6 @@ function Section({ label, enabled, onToggle, children }) {
       </label>
       {enabled ? <div className="panel-section__body">{children}</div> : null}
     </div>
-  );
-}
-
-/** Range slider with a live value readout. */
-function Slider({ label, min, max, step = 1, value, onChange }) {
-  return (
-    <label className="slider">
-      <span className="slider__label">
-        {label}
-        <em>{value}</em>
-      </span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-      />
-    </label>
   );
 }
 
