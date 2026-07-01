@@ -35,9 +35,9 @@ function IconButton({ title, active, disabled, onClick, children }) {
 }
 
 /**
- * Right-edge control rail. Opens on load then auto-hides; a grip tab at the
- * edge reveals it again (hover on desktop, tap on mobile). Click/tap outside
- * closes it. Buttons: Grid, List, Edit, Theme (+ add/scan/background in edit).
+ * Right-edge control rail. Starts closed; a grip tab at the edge reveals it
+ * (hover on desktop, tap on mobile). Click/tap outside closes it. Buttons:
+ * Theme, Add, Scan, Background, Grid, List, Edit.
  */
 export default function Toolbar({
   authed,
@@ -73,10 +73,10 @@ export default function Toolbar({
   // Hover reveal is mouse-only and only once unlocked, so an idle visitor isn't
   // nagged for a password just by moving the cursor near the edge. Touch/locked
   // users open via tapping the tab (which runs the auth gate).
-  const onMouseShow = (e) => {
+  const revealOnHover = (e) => {
     if (e.pointerType === 'mouse' && authed) setOpen(true);
   };
-  const onMouseHide = (e) => {
+  const hideOnHover = (e) => {
     if (e.pointerType === 'mouse') setOpen(false);
   };
 
@@ -87,13 +87,13 @@ export default function Toolbar({
         className="rail__tab"
         title={STRINGS.SHOW_CONTROLS}
         aria-label={STRINGS.SHOW_CONTROLS}
-        onPointerEnter={onMouseShow}
+        onPointerEnter={revealOnHover}
         onClick={() => (open ? setOpen(false) : requestOpen())}
       >
         <GripVertical size={ICON} />
       </button>
 
-      <div className="rail__panel" onPointerEnter={onMouseShow} onPointerLeave={onMouseHide}>
+      <div className="rail__panel" onPointerEnter={revealOnHover} onPointerLeave={hideOnHover}>
         <IconButton title={STRINGS.TOGGLE_THEME} onClick={onToggleTheme}>
           {theme === THEME.DARK ? <Sun size={ICON} /> : <Moon size={ICON} />}
         </IconButton>

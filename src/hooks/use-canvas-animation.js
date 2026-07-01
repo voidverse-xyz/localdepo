@@ -1,5 +1,11 @@
 import { useEffect, useRef } from 'react';
 
+// Cap the device-pixel-ratio so very high-DPI screens don't render 3-4x the pixels.
+const MAX_DPR = 2;
+// Clamp the per-frame delta (seconds) so animation doesn't lurch after the tab
+// was backgrounded and requestAnimationFrame paused.
+const MAX_FRAME_DT = 0.05;
+
 /**
  * Reusable canvas animation loop. Handles DPR-aware sizing, resize, and the
  * requestAnimationFrame loop so individual effects only describe how to draw.
@@ -23,7 +29,7 @@ export function useCanvasAnimation(draw, deps = []) {
     let height = 0;
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       width = canvas.clientWidth;
       height = canvas.clientHeight;
       canvas.width = Math.max(1, Math.floor(width * dpr));
@@ -32,7 +38,7 @@ export function useCanvasAnimation(draw, deps = []) {
     };
 
     const frame = (now) => {
-      const dt = Math.min((now - last) / 1000, 0.05); // clamp to avoid jumps
+      const dt = Math.min((now - last) / 1000, MAX_FRAME_DT);
       last = now;
       drawRef.current(ctx, { width, height, dt, t: now / 1000 });
       raf = requestAnimationFrame(frame);

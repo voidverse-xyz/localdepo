@@ -69,6 +69,11 @@ export async function scanNetwork({ targets, ports, concurrency = SCAN.CONCURREN
     concurrency,
   );
 
+  // Keep the first hit per URL so the same service on two ports isn't listed twice.
   const seen = new Set();
-  return found.filter((s) => (seen.has(s.url) ? false : seen.add(s.url)));
+  return found.filter((s) => {
+    if (seen.has(s.url)) return false;
+    seen.add(s.url);
+    return true;
+  });
 }

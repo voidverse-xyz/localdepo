@@ -13,6 +13,10 @@ import BackgroundStack from '@/components/backgrounds/background-stack.jsx';
 import LayoutGrid, { gridSlot } from './layout-grid.jsx';
 import ServiceList from './service-list.jsx';
 
+// How long to wait after the last layout tweak before persisting it, so a burst
+// of drag/resize events collapses into a single save.
+const LAYOUT_SAVE_DEBOUNCE_MS = 600;
+
 /**
  * Top-level client orchestrator. Owns dashboard state (services, view mode,
  * layout, background) and the auth/edit gating. Children stay presentational.
@@ -119,7 +123,7 @@ export default function Dashboard({ initialConfig }) {
 
   // --- layout persistence (debounced; only when actively editing) ---
   const saveLayoutDebounced = useMemo(
-    () => debounce((payload) => api.saveLayout(payload).catch(() => {}), 600),
+    () => debounce((payload) => api.saveLayout(payload).catch(() => {}), LAYOUT_SAVE_DEBOUNCE_MS),
     [],
   );
 
@@ -254,6 +258,48 @@ export default function Dashboard({ initialConfig }) {
   // Only services that are both still present and pinned to the grid show as tiles.
   const gridServices = services.filter((s) => gridIds.has(s.id));
 
+  // Pick the main content for the current state (empty catalog, list view, empty
+  // grid hint, or the grid). Written as early returns to keep the JSX below flat.
+  const renderContent = () => {
+    if (services.length === 0) {
+      return <p className="empty">{STRINGS.NO_SERVICES}</p>;
+    }
+    if (isList) {
+      return (
+        <ServiceList
+          services={services}
+          editMode={editMode}
+          authed={authed}
+          gridIds={gridIds}
+          onEdit={setDialog}
+          onDelete={deleteService}
+          onAddToGrid={addToGrid}
+          onRemoveFromGrid={removeFromGrid}
+        />
+      );
+    }
+    if (gridServices.length === 0) {
+      return (
+        <div className="grid-empty">
+          <p className="grid-empty__row">
+            <ArrowLeft size={20} aria-hidden="true" />
+            {STRINGS.GRID_EMPTY}
+          </p>
+        </div>
+      );
+    }
+    return (
+      <LayoutGrid
+        services={gridServices}
+        editMode={editMode}
+        layout={gridLayout}
+        onLayoutChange={handleLayoutChange}
+        onEdit={setDialog}
+        onRemoveFromGrid={removeFromGrid}
+      />
+    );
+  };
+
   return (
     <div className="app">
       <BackgroundStack background={background} />
@@ -274,36 +320,7 @@ export default function Dashboard({ initialConfig }) {
       />
 
       <div className={`app__content${ready ? ' app__content--ready' : ''}`}>
-        {services.length === 0 ? (
-          <p className="empty">{STRINGS.NO_SERVICES}</p>
-        ) : isList ? (
-          <ServiceList
-            services={services}
-            editMode={editMode}
-            authed={authed}
-            gridIds={gridIds}
-            onEdit={setDialog}
-            onDelete={deleteService}
-            onAddToGrid={addToGrid}
-            onRemoveFromGrid={removeFromGrid}
-          />
-        ) : gridServices.length === 0 ? (
-          <div className="grid-empty">
-            <p className="grid-empty__row">
-              <ArrowLeft size={20} aria-hidden="true" />
-              {STRINGS.GRID_EMPTY}
-            </p>
-          </div>
-        ) : (
-          <LayoutGrid
-            services={gridServices}
-            editMode={editMode}
-            layout={gridLayout}
-            onLayoutChange={handleLayoutChange}
-            onEdit={setDialog}
-            onRemoveFromGrid={removeFromGrid}
-          />
-        )}
+        {renderContent()}
       </div>
 
       {pwOpen ? (

@@ -11,21 +11,20 @@ export class ApiError extends Error {
   }
 }
 
+/** Parse a JSON response, throwing an ApiError for any non-2xx status. */
+async function toResult(res) {
+  const data = await res.json().catch(() => null); // tolerate empty / non-JSON bodies
+  if (!res.ok) throw new ApiError(data?.error || res.statusText, res.status, data);
+  return data;
+}
+
 async function request(url, { method = 'GET', body } = {}) {
   const init = { method, headers: {} };
   if (body !== undefined) {
     init.headers['content-type'] = 'application/json';
     init.body = JSON.stringify(body);
   }
-  const res = await fetch(url, init);
-  let data = null;
-  try {
-    data = await res.json();
-  } catch {
-    /* empty / non-JSON body */
-  }
-  if (!res.ok) throw new ApiError(data?.error || res.statusText, res.status, data);
-  return data;
+  return toResult(await fetch(url, init));
 }
 
 export const api = {
@@ -52,9 +51,6 @@ export const api = {
   async uploadImage(file) {
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch(API.UPLOAD, { method: 'POST', body: form });
-    const data = await res.json().catch(() => null);
-    if (!res.ok) throw new ApiError(data?.error || res.statusText, res.status, data);
-    return data;
+    return toResult(await fetch(API.UPLOAD, { method: 'POST', body: form }));
   },
 };
