@@ -7,8 +7,8 @@ import Slider from '@/components/ui/slider.jsx';
 import { STRINGS, THEME } from '@/core/constants.js';
 import { api } from '@/lib/api.js';
 
-/** Add (initial = {}) or edit (initial = service) a service. */
-export default function ServiceEditDialog({ initial, theme, onSave, onCancel, onDelete }) {
+/** Add (initial = {}) or edit (initial = service) a service. `error` is a server-side save failure. */
+export default function ServiceEditDialog({ initial, theme, error, onSave, onCancel, onDelete }) {
   // A service with no custom colour follows the theme surface/text, so the
   // "unset" swatches preview those defaults for the active (incl. system) theme.
   const isLight = theme === THEME.LIGHT;
@@ -24,6 +24,7 @@ export default function ServiceEditDialog({ initial, theme, onSave, onCancel, on
     bgOpacity: initial?.bgOpacity ?? 100,
   });
   const [uploading, setUploading] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const setValue = (key, value) => setForm((f) => ({ ...f, [key]: value }));
@@ -48,9 +49,18 @@ export default function ServiceEditDialog({ initial, theme, onSave, onCancel, on
   };
 
   const save = () => {
-    if (!form.name.trim() || !form.url.trim()) return;
-    onSave({ ...initial, ...form });
+    const name = form.name.trim();
+    const url = form.url.trim();
+    if (!name || !url) {
+      setFormError(STRINGS.FORM_REQUIRED);
+      return;
+    }
+    setFormError('');
+    onSave({ ...initial, ...form, name, url, icon: form.icon.trim() });
   };
+
+  // Local validation first, then whatever the last save attempt reported.
+  const shownError = formError || error;
 
   return (
     <Modal
@@ -122,6 +132,8 @@ export default function ServiceEditDialog({ initial, theme, onSave, onCancel, on
         disabled={!form.bg}
         onChange={(v) => setValue('bgOpacity', v)}
       />
+
+      {shownError ? <p className="form-error">{shownError}</p> : null}
     </Modal>
   );
 }

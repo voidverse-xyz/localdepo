@@ -48,6 +48,7 @@ export default function Dashboard({ initialConfig }) {
   const pendingAction = useRef(null);
 
   const [dialog, setDialog] = useState(null); // null=closed, {}=add, service=edit
+  const [dialogError, setDialogError] = useState(''); // server-side save failure, shown in the dialog
   const [bgPanelOpen, setBgPanelOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
 
@@ -167,7 +168,15 @@ export default function Dashboard({ initialConfig }) {
   }, [editMode, requireAuth]);
 
   // --- service CRUD ---
-  const closeDialog = useCallback(() => setDialog(null), []);
+  const openDialog = useCallback((service) => {
+    setDialogError('');
+    setDialog(service);
+  }, []);
+
+  const closeDialog = useCallback(() => {
+    setDialog(null);
+    setDialogError('');
+  }, []);
 
   const saveService = useCallback(async (data) => {
     const isNew = !data.id;
@@ -175,10 +184,11 @@ export default function Dashboard({ initialConfig }) {
       const result = isNew ? await api.addService(data) : await api.updateService(data);
       setServices(result.services);
       setDialog(null);
+      setDialogError('');
       // A brand-new service lands in the master catalog, so surface it there.
       if (isNew) setViewMode(VIEW_MODE.LIST);
-    } catch {
-      /* errors surfaced via disabled UX; kept silent for v1 */
+    } catch (err) {
+      setDialogError(err?.message || STRINGS.SAVE_FAILED);
     }
   }, []);
 
@@ -253,7 +263,7 @@ export default function Dashboard({ initialConfig }) {
   }, []);
 
   const isList = viewMode === VIEW_MODE.LIST;
-  const gridLayout = Array.isArray(layout.grid) ? layout.grid : [];
+  const gridLayout = useMemo(() => (Array.isArray(layout.grid) ? layout.grid : []), [layout.grid]);
   const gridIds = useMemo(() => new Set(gridLayout.map((g) => g.i)), [gridLayout]);
   // Only services that are both still present and pinned to the grid show as tiles.
   const gridServices = services.filter((s) => gridIds.has(s.id));
@@ -271,7 +281,7 @@ export default function Dashboard({ initialConfig }) {
           editMode={editMode}
           authed={authed}
           gridIds={gridIds}
-          onEdit={setDialog}
+          onEdit={openDialog}
           onDelete={deleteService}
           onAddToGrid={addToGrid}
           onRemoveFromGrid={removeFromGrid}
@@ -294,7 +304,7 @@ export default function Dashboard({ initialConfig }) {
         editMode={editMode}
         layout={gridLayout}
         onLayoutChange={handleLayoutChange}
-        onEdit={setDialog}
+        onEdit={openDialog}
         onRemoveFromGrid={removeFromGrid}
       />
     );
@@ -311,7 +321,7 @@ export default function Dashboard({ initialConfig }) {
         onViewMode={handleViewMode}
         editMode={editMode}
         onToggleEdit={toggleEdit}
-        onAdd={() => setDialog({})}
+        onAdd={() => openDialog({})}
         onScan={runScan}
         onBackground={() => setBgPanelOpen(true)}
         scanning={scanning}
@@ -331,6 +341,7 @@ export default function Dashboard({ initialConfig }) {
         <ServiceEditDialog
           initial={dialog}
           theme={effectiveTheme}
+          error={dialogError}
           onSave={saveService}
           onCancel={closeDialog}
           onDelete={deleteService}

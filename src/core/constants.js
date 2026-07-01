@@ -163,6 +163,8 @@ export const STRINGS = {
   UPLOAD_ICON: 'Upload icon',
   UPLOADING: 'Uploading…',
   CONFIRM_DELETE: 'Delete this service?',
+  FORM_REQUIRED: 'Name and URL are required',
+  SAVE_FAILED: 'Save failed',
 };
 
 /** HTTP status codes used by API routes. */
