@@ -63,8 +63,10 @@
  * @typedef {Object} Config
  * @property {number} version
  * @property {Service[]} services
+ * @property {string[]} dismissed - Discovered ids the user deleted (suppressed on rescan).
  * @property {{mode:string}} view
- * @property {{custom:Object,grid:Object}} layout - Per-mode, per-breakpoint layouts.
+ * @property {{grid: LayoutItem[]}} layout - Controlled react-grid-layout geometry.
+ * @property {{theme:string}} ui
  * @property {BackgroundConfig} background
  */
 

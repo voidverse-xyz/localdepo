@@ -26,7 +26,6 @@ export const STORAGE = {
 
 /** View modes for the dashboard. */
 export const VIEW_MODE = {
-  CUSTOM: 'custom',
   GRID: 'grid',
   LIST: 'list',
 };
@@ -42,14 +41,6 @@ export const SERVICE_SOURCE = {
 export const SCHEME = {
   HTTP: 'http',
   HTTPS: 'https',
-};
-
-/** Background layer keys (all composable / independently toggleable). */
-export const BG_LAYER = {
-  COLOR: 'color',
-  IMAGE: 'image',
-  EFFECT: 'effect',
-  OVERLAY: 'overlay',
 };
 
 /** How a background image fills the viewport. */
@@ -136,7 +127,6 @@ export const STRINGS = {
   CANCEL: 'Cancel',
   CLOSE: 'Close',
   SCAN_NOW: 'Scan network',
-  SCANNING: 'Scanning…',
   SETTINGS: 'Background',
   RESET_EFFECT: 'Reset effect',
   TOGGLE_THEME: 'Toggle light/dark',
@@ -150,7 +140,6 @@ export const STRINGS = {
   SEARCH: 'Search services…',
   ADD_TO_GRID: 'Add to grid',
   REMOVE_FROM_GRID: 'Remove from grid',
-  VIEW_CUSTOM: 'Custom',
   VIEW_GRID: 'Grid',
   VIEW_LIST: 'List',
   FIELD_NAME: 'Name',

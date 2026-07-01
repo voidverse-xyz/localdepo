@@ -20,7 +20,7 @@ export function defaultConfig() {
     dismissed: [], // discovered service ids the user deleted (suppress on rescan)
     view: { mode: VIEW_MODE.LIST },
     layout: { grid: [] }, // controlled react-grid-layout array of {i,x,y,w,h}
-    ui: { theme: THEME.SYSTEM, controls: null }, // controls = saved {x,y} or null (default corner)
+    ui: { theme: THEME.SYSTEM },
     background: defaultBackground(),
   };
 }
