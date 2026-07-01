@@ -21,7 +21,12 @@ export async function GET(_request, { params }) {
     const data = await fs.readFile(filePath);
     const type = TYPE_BY_EXT[path.extname(name).toLowerCase()] || 'application/octet-stream';
     return new Response(data, {
-      headers: { 'content-type': type, 'cache-control': 'public, max-age=3600' },
+      headers: {
+        'content-type': type,
+        'cache-control': 'public, max-age=3600',
+        // Uploaded bytes must never be sniffed into a scriptable type.
+        'x-content-type-options': 'nosniff',
+      },
     });
   } catch {
     return new Response('Not found', { status: 404 });

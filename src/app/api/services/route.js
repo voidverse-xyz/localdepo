@@ -1,19 +1,19 @@
 import { randomUUID } from 'node:crypto';
 import { readConfig, updateConfig } from '@/core/storage/config-store.js';
 import { json, badRequest, readJson, isAuthed, unauthorized } from '@/lib/server/api.js';
+import {
+  normalizeServiceName,
+  normalizeServiceUrl,
+  normalizeIcon,
+  normalizeColor,
+  normalizeOpacity,
+} from '@/core/validation.js';
 import { SERVICE_SOURCE } from '@/core/constants.js';
 import { pick } from '@/lib/object.js';
-import { clamp } from '@/lib/math.js';
 
 export const dynamic = 'force-dynamic';
 
 const EDITABLE = ['name', 'url', 'icon', 'enabled', 'bg', 'fg', 'bgOpacity'];
-
-/** Coerce a client-supplied background opacity to an integer percent in [0, 100]. */
-function normalizeOpacity(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? Math.round(clamp(n, 0, 100)) : 100;
-}
 
 export async function GET() {
   const config = await readConfig();
@@ -25,16 +25,19 @@ export async function POST(request) {
   if (!isAuthed()) return unauthorized();
   const { body, error } = await readJson(request);
   if (error) return error;
-  if (!body?.name || !body?.url) return badRequest('name and url are required');
+
+  const name = normalizeServiceName(body?.name);
+  const url = normalizeServiceUrl(body?.url);
+  if (!name || !url) return badRequest('name and a valid http(s) url are required');
 
   const service = {
     id: randomUUID(),
-    name: body.name,
-    url: body.url,
-    icon: body.icon || '',
-    bg: body.bg || '',
-    fg: body.fg || '',
-    bgOpacity: normalizeOpacity(body.bgOpacity),
+    name,
+    url,
+    icon: normalizeIcon(body?.icon),
+    bg: normalizeColor(body?.bg),
+    fg: normalizeColor(body?.fg),
+    bgOpacity: normalizeOpacity(body?.bgOpacity),
     source: SERVICE_SOURCE.MANUAL,
     enabled: true,
   };
@@ -52,6 +55,18 @@ export async function PUT(request) {
   if (!body?.id) return badRequest('id is required');
 
   const updates = pick(body, EDITABLE);
+  if (updates.name !== undefined) {
+    updates.name = normalizeServiceName(updates.name);
+    if (!updates.name) return badRequest('name is required');
+  }
+  if (updates.url !== undefined) {
+    updates.url = normalizeServiceUrl(updates.url);
+    if (!updates.url) return badRequest('url must be a valid http(s) url');
+  }
+  if (updates.icon !== undefined) updates.icon = normalizeIcon(updates.icon);
+  if (updates.bg !== undefined) updates.bg = normalizeColor(updates.bg);
+  if (updates.fg !== undefined) updates.fg = normalizeColor(updates.fg);
+  if (updates.enabled !== undefined) updates.enabled = Boolean(updates.enabled);
   if (updates.bgOpacity !== undefined) updates.bgOpacity = normalizeOpacity(updates.bgOpacity);
 
   let found = false;

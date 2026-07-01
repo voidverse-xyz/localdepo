@@ -1,5 +1,6 @@
 import { readConfig, updateConfig } from '@/core/storage/config-store.js';
-import { json, readJson, isAuthed, unauthorized } from '@/lib/server/api.js';
+import { json, readJson, badRequest, isAuthed, unauthorized } from '@/lib/server/api.js';
+import { sanitizeGridItems } from '@/core/validation.js';
 import { VIEW_MODES, THEMES } from '@/core/constants.js';
 
 export const dynamic = 'force-dynamic';
@@ -9,27 +10,22 @@ export async function GET() {
   return json({ view: config.view, layout: config.layout, ui: config.ui });
 }
 
-/** Persist the tile layout, view mode, and UI prefs (theme + controls position). */
+/** Persist the tile layout, view mode, and UI prefs (theme). */
 export async function PUT(request) {
   if (!isAuthed()) return unauthorized();
   const { body, error } = await readJson(request);
   if (error) return error;
+  if (!body || typeof body !== 'object') return badRequest();
+
+  // null when the payload carried no usable grid. Only ever persisting a
+  // sanitized array also means migrate() can't later drop the whole layout
+  // and silently wipe the user's saved tiles.
+  const grid = sanitizeGridItems(body.layout?.grid);
 
   const config = await updateConfig((cfg) => {
-    if (body.layout && typeof body.layout === 'object') {
-      const patch = { ...body.layout };
-      // Never persist a non-array grid — otherwise migrate() would later drop
-      // the whole layout, silently wiping the user's saved tiles.
-      if (patch.grid !== undefined && !Array.isArray(patch.grid)) delete patch.grid;
-      cfg.layout = { ...cfg.layout, ...patch };
-    }
-    if (body.view?.mode && VIEW_MODES.includes(body.view.mode)) {
-      cfg.view.mode = body.view.mode;
-    }
-    if (body.ui && typeof body.ui === 'object') {
-      if (THEMES.includes(body.ui.theme)) cfg.ui.theme = body.ui.theme;
-      if (body.ui.controls !== undefined) cfg.ui.controls = body.ui.controls;
-    }
+    if (grid) cfg.layout = { ...cfg.layout, grid };
+    if (VIEW_MODES.includes(body.view?.mode)) cfg.view.mode = body.view.mode;
+    if (THEMES.includes(body.ui?.theme)) cfg.ui.theme = body.ui.theme;
   });
   return json({ view: config.view, layout: config.layout, ui: config.ui });
 }

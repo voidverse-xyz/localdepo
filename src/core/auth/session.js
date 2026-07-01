@@ -7,9 +7,13 @@ import { ENV, SESSION } from '../constants.js';
  * leaves the server.
  */
 
+// Random per-process fallback: when SESSION_SECRET is unset, sessions still
+// work but reset on restart. Never a hardcoded value — that would make admin
+// tokens forgeable by anyone who has read the source.
+const fallbackSecret = crypto.randomBytes(32).toString('hex');
+
 function secret() {
-  // A stable fallback keeps dev working; production should set SESSION_SECRET.
-  return process.env[ENV.SESSION_SECRET] || 'localdepo-insecure-dev-secret';
+  return process.env[ENV.SESSION_SECRET] || fallbackSecret;
 }
 
 function sign(payload) {

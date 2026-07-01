@@ -81,6 +81,12 @@ export const SESSION = {
   TTL_SECONDS: 60 * 60 * 24 * 7, // 7 days
 };
 
+/** Login brute-force throttling: lock a client out after too many failures. */
+export const LOGIN = {
+  MAX_FAILURES: 10,
+  WINDOW_MS: 15 * 60 * 1000,
+};
+
 /** API route paths (used by the client fetch layer). */
 export const API = {
   AUTH: '/api/auth',
@@ -165,6 +171,7 @@ export const HTTP = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   PAYLOAD_TOO_LARGE: 413,
+  TOO_MANY_REQUESTS: 429,
   UNSUPPORTED_MEDIA: 415,
   SERVER_ERROR: 500,
 };
