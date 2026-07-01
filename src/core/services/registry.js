@@ -19,10 +19,6 @@ export function getAllDefinitions() {
   return DEFINITIONS;
 }
 
-export function getDefinition(id) {
-  return DEFINITIONS.find((d) => d.id === id) || null;
-}
-
 /** All distinct ports across the catalog (used to bound the scan surface). */
 export function getAllPorts() {
   const ports = new Set();

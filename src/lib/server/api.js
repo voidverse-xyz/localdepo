@@ -22,6 +22,18 @@ export function badRequest(message = 'bad request') {
   return json({ error: message }, HTTP.BAD_REQUEST);
 }
 
+/**
+ * Parse a JSON request body. Returns `{ body }` on success, or `{ error }`
+ * holding a 400 response the caller can return directly.
+ */
+export async function readJson(request) {
+  try {
+    return { body: await request.json() };
+  } catch {
+    return { error: badRequest() };
+  }
+}
+
 export function serverError(message = 'server error') {
   return json({ error: message }, HTTP.SERVER_ERROR);
 }

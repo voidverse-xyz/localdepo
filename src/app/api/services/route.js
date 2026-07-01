@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { readConfig, updateConfig } from '@/core/storage/config-store.js';
-import { json, badRequest, isAuthed, unauthorized } from '@/lib/server/api.js';
+import { json, badRequest, readJson, isAuthed, unauthorized } from '@/lib/server/api.js';
 import { SERVICE_SOURCE } from '@/core/constants.js';
 import { pick } from '@/lib/object.js';
 import { clamp } from '@/lib/math.js';
@@ -23,12 +23,8 @@ export async function GET() {
 /** Add a manual service. */
 export async function POST(request) {
   if (!isAuthed()) return unauthorized();
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return badRequest();
-  }
+  const { body, error } = await readJson(request);
+  if (error) return error;
   if (!body?.name || !body?.url) return badRequest('name and url are required');
 
   const service = {
@@ -51,12 +47,8 @@ export async function POST(request) {
 /** Edit an existing service (manual or discovered). */
 export async function PUT(request) {
   if (!isAuthed()) return unauthorized();
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return badRequest();
-  }
+  const { body, error } = await readJson(request);
+  if (error) return error;
   if (!body?.id) return badRequest('id is required');
 
   const updates = pick(body, EDITABLE);

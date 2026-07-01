@@ -1,5 +1,5 @@
 import { readConfig, updateConfig } from '@/core/storage/config-store.js';
-import { json, badRequest, isAuthed, unauthorized } from '@/lib/server/api.js';
+import { json, readJson, isAuthed, unauthorized } from '@/lib/server/api.js';
 import { VIEW_MODES, THEMES } from '@/core/constants.js';
 
 export const dynamic = 'force-dynamic';
@@ -12,12 +12,8 @@ export async function GET() {
 /** Persist the tile layout, view mode, and UI prefs (theme + controls position). */
 export async function PUT(request) {
   if (!isAuthed()) return unauthorized();
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return badRequest();
-  }
+  const { body, error } = await readJson(request);
+  if (error) return error;
 
   const config = await updateConfig((cfg) => {
     if (body.layout && typeof body.layout === 'object') {

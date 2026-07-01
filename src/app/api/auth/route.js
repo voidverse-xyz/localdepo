@@ -1,5 +1,5 @@
 import { checkPassword, createToken } from '@/core/auth/session.js';
-import { json, badRequest, unauthorized, isAuthed, sessionCookieOptions } from '@/lib/server/api.js';
+import { json, readJson, unauthorized, isAuthed, sessionCookieOptions } from '@/lib/server/api.js';
 import { SESSION } from '@/core/constants.js';
 
 export const dynamic = 'force-dynamic';
@@ -11,12 +11,8 @@ export async function GET() {
 
 /** Log in: verify the password and set the signed session cookie. */
 export async function POST(request) {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return badRequest();
-  }
+  const { body, error } = await readJson(request);
+  if (error) return error;
   if (!checkPassword(body?.password)) return unauthorized();
 
   const res = json({ ok: true });
