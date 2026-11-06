@@ -22,7 +22,7 @@ single JSON file.
 
 ```bash
 cp .env.example .env        # set ADMIN_PASSWORD and SESSION_SECRET
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f compose.prod.yaml up -d --build
 ```
 
 Open `http://<host>:3000`. Click **Edit**, enter the admin password, then
@@ -32,11 +32,11 @@ Open `http://<host>:3000`. Click **Edit**, enter the admin password, then
 > scanner can reach the LAN. To scan a specific range instead, set `SCAN_CIDR`
 > (e.g. `192.168.1.0/24`).
 
-Two Dockerfiles back this:
+Two container build files back this:
 
-- `Dockerfile` — optimized multi-stage **production** image (`next build` +
+- `Containerfile` — optimized multi-stage **production** image (`next build` +
   standalone output, non-root).
-- `Dockerfile.local` — **development** image that runs `next dev` with hot reload.
+- `Containerfile.local` — **development** image that runs `next dev` with hot reload.
 
 ## Configuration (env)
 
@@ -46,6 +46,12 @@ Two Dockerfiles back this:
 | `SESSION_SECRET` | yes      | Secret used to sign the session cookie.                |
 | `SCAN_CIDR`      | no       | Subnet to scan; auto-detected from the host if unset.  |
 | `DATA_DIR`       | no       | Where config + uploads live (default `/data`).         |
+| `DEV_PORT`       | no       | Development host port (default `3001`).               |
+| `PORT`           | no       | Production host port (default `3000`).                |
+
+Compose passes `SCAN_CIDR` from `.env` into the container. Set it for LAN scans
+in development, where bridge networking cannot detect the host's subnet.
+Production requires nonempty `ADMIN_PASSWORD` and `SESSION_SECRET` values.
 
 ## Adding a service plugin
 
@@ -83,27 +89,44 @@ then register it in `src/components/backgrounds/effects/registry.js`.
 ## Development
 
 Everything runs through Docker (no host Node required). The dev compose builds
-`Dockerfile.local` and runs `next dev`; **Compose watch** syncs your edits into
+`Containerfile.local` and runs `next dev`; **Compose watch** syncs your edits into
 the running container for hot reload:
 
 ```bash
-docker compose watch        # build, start, and live-sync code changes
+cp .env.example .env        # set ADMIN_PASSWORD, SESSION_SECRET, and SCAN_CIDR
+docker compose up --build --watch app
 ```
 
-Then open `http://localhost:3000`. Edits under `src/` and `public/` hot-reload;
-changing `package.json` rebuilds the image automatically.
+Then open `http://<host>:3001` (or the port set by `DEV_PORT`). Source and public
+assets hot-reload; configuration changes restart the service. Changes to either
+package manifest or `Containerfile.local` rebuild the image automatically.
 
 Without watch (plain build + run):
 
 ```bash
-docker compose up --build
+docker compose up --build app
 ```
 
-Run the unit tests (pure `core/` logic — no dependencies needed):
+Run the unit tests in the running development service:
 
 ```bash
-docker run --rm -v "$PWD":/app -w /app node:22-alpine npm test
+docker compose exec app npm test
 ```
+
+To include fake services for discovery testing:
+
+```bash
+docker compose -f compose.yaml -f compose.fixtures.yaml up -d --build
+```
+
+### Upgrading the Compose setup
+
+The default file is now `compose.yaml`, the production file is
+`compose.prod.yaml`, and the service is named `app`. Stop an existing deployment
+with its previous Compose files before upgrading so two instances do not write
+the same config. Both setups continue to use `./data:/data`, preserving existing
+config and uploads. The default development host port changes from 3000 to 3001;
+set `DEV_PORT=3000` to use the previous port.
 
 ### Code style
 
@@ -116,10 +139,10 @@ on warnings. Run `npm run lint:fix` in a checkout with dependencies installed to
 apply automatic style fixes, then review the diff. To check through Docker:
 
 ```bash
-docker compose run --rm --build localdepo npm run lint
+docker compose run --rm --build app npm run lint
 ```
 
 > Note: this repo's working directory is on a filesystem that doesn't support
 > symlinks, so `npm install` against a bind mount fails. Dependency install and
 > `next build` therefore happen **inside** the image (Docker's overlay fs), which
-> is exactly what the Dockerfiles do.
+> is exactly what the Containerfiles do.

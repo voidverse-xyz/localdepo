@@ -1,0 +1,53 @@
+services:
+    app:
+        build:
+            context: ./
+            dockerfile: Containerfile.local
+        ports:
+            - "${DEV_PORT:-3001}:3000"
+        volumes:
+            - ./data:/data
+        environment:
+            - NODE_ENV=development
+            - DATA_DIR=/data
+            - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+            - SESSION_SECRET=${SESSION_SECRET:-}
+            # Bridge networking needs an explicit LAN subnet for discovery.
+            - SCAN_CIDR=${SCAN_CIDR:-}
+        restart: unless-stopped
+        stop_grace_period: 40s
+        develop:
+            watch:
+                # Next.js provides hot reload after source and assets sync.
+                - path: ./src
+                  action: sync
+                  target: /app/src
+                - path: ./public
+                  action: sync
+                  target: /app/public
+                - path: ./test
+                  action: sync
+                  target: /app/test
+                - path: ./next.config.js
+                  action: sync+restart
+                  target: /app/next.config.js
+                - path: ./tailwind.config.js
+                  action: sync+restart
+                  target: /app/tailwind.config.js
+                - path: ./postcss.config.mjs
+                  action: sync+restart
+                  target: /app/postcss.config.mjs
+                - path: ./jsconfig.json
+                  action: sync+restart
+                  target: /app/jsconfig.json
+                - path: ./.eslintrc.json
+                  action: sync
+                  target: /app/.eslintrc.json
+                - path: ./package.json
+                  action: rebuild
+                - path: ./package-lock.json
+                  action: rebuild
+                - path: ./Containerfile.local
+                  action: rebuild
+                - path: ./.dockerignore
+                  action: rebuild

@@ -3,8 +3,8 @@
 # ---- deps: install node_modules ----
 FROM node:22-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci || npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # ---- build: compile the standalone Next.js server ----
 FROM node:22-alpine AS build
