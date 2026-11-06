@@ -36,7 +36,14 @@ function buildLayout(services, saved) {
   return services.map((service, index) => {
     const existing = byId.get(service.id);
     if (existing) {
-      return { i: service.id, x: existing.x, y: existing.y, w: existing.w, h: existing.h, ...GRID.MIN_TILE };
+      return {
+        i: service.id,
+        x: existing.x,
+        y: existing.y,
+        w: existing.w,
+        h: existing.h,
+        ...GRID.MIN_TILE,
+      };
     }
     return gridSlot(service.id, index);
   });
@@ -47,7 +54,14 @@ function buildLayout(services, saved) {
  * Tiles stay where you put them and keep their size; draggable/resizable only
  * in edit mode.
  */
-export default function LayoutGrid({ services, editMode, layout, onLayoutChange, onEdit, onRemoveFromGrid }) {
+export default function LayoutGrid({
+  services,
+  editMode,
+  layout,
+  onLayoutChange,
+  onEdit,
+  onRemoveFromGrid,
+}) {
   const computed = buildLayout(services, layout);
 
   return (
@@ -73,7 +87,7 @@ export default function LayoutGrid({ services, editMode, layout, onLayoutChange,
         preventCollision={false}
         draggableCancel=".no-drag"
         resizeHandles={['se']}
-        onLayoutChange={(next) => onLayoutChange(next)}
+        onLayoutChange={onLayoutChange}
       >
         {services.map((service) => (
           <div key={service.id}>

@@ -28,7 +28,8 @@ export function badRequest(message = 'bad request') {
  */
 export async function readJson(request) {
   try {
-    return { body: await request.json() };
+    const body = await request.json();
+    return { body };
   } catch {
     return { error: badRequest() };
   }

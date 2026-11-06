@@ -55,14 +55,25 @@ export default function ServiceTile({ service, editMode, onEdit, onRemoveFromGri
           {body}
         </div>
       ) : (
-        <a className={innerClass} style={style} href={service.url} target="_blank" rel="noreferrer noopener">
+        <a
+          className={innerClass}
+          style={style}
+          href={service.url}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           {body}
         </a>
       )}
 
       {editMode ? (
         <div className="no-drag absolute right-1.5 top-1.5 flex gap-1">
-          <button className={BTN} onClick={() => onEdit(service)} title={STRINGS.EDIT} aria-label={STRINGS.EDIT}>
+          <button
+            className={BTN}
+            onClick={() => onEdit(service)}
+            title={STRINGS.EDIT}
+            aria-label={STRINGS.EDIT}
+          >
             <Pencil size={14} />
           </button>
           <button

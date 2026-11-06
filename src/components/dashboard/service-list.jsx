@@ -32,7 +32,12 @@ const ServiceRow = memo(function ServiceRow({
       {editMode ? (
         <div className="list__main">{body}</div>
       ) : (
-        <a className="list__main" href={service.url} target="_blank" rel="noreferrer noopener">
+        <a
+          className="list__main"
+          href={service.url}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           {body}
         </a>
       )}
@@ -108,7 +113,7 @@ export default function ServiceList({
       />
 
       {rows.length === 0 ? (
-        <p className="list__empty">{query ? 'No matches.' : STRINGS.NO_SERVICES}</p>
+        <p className="list__empty">{query ? STRINGS.NO_MATCHES : STRINGS.NO_SERVICES}</p>
       ) : (
         <ul className="list">
           {rows.map((service) => (

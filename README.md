@@ -105,6 +105,20 @@ Run the unit tests (pure `core/` logic — no dependencies needed):
 docker run --rm -v "$PWD":/app -w /app node:22-alpine npm test
 ```
 
+### Code style
+
+JavaScript uses two-space indentation, single quotes, semicolons, and trailing
+commas in multiline lists. JSX with more than three props uses one prop per line.
+Keep shared UI text in `STRINGS` and effect-specific labels in their catalog files.
+
+`npm run lint` checks source, tests, and JavaScript configuration files and fails
+on warnings. Run `npm run lint:fix` in a checkout with dependencies installed to
+apply automatic style fixes, then review the diff. To check through Docker:
+
+```bash
+docker compose run --rm --build localdepo npm run lint
+```
+
 > Note: this repo's working directory is on a filesystem that doesn't support
 > symlinks, so `npm install` against a bind mount fails. Dependency install and
 > `next build` therefore happen **inside** the image (Docker's overlay fs), which

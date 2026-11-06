@@ -13,7 +13,16 @@
  * @param {string} [suffix]  - Appended to the readout (e.g. "%").
  * @param {boolean} [disabled]
  */
-export default function Slider({ label, min, max, step = 1, value, onChange, suffix = '', disabled = false }) {
+export default function Slider({
+  label,
+  min,
+  max,
+  step = 1,
+  value,
+  onChange,
+  suffix = '',
+  disabled = false,
+}) {
   return (
     <label className="slider">
       <span className="slider__label">
