@@ -24,7 +24,8 @@ async function request(url, { method = 'GET', body } = {}) {
     init.headers['content-type'] = 'application/json';
     init.body = JSON.stringify(body);
   }
-  return toResult(await fetch(url, init));
+  const response = await fetch(url, init);
+  return toResult(response);
 }
 
 export const api = {
@@ -51,6 +52,7 @@ export const api = {
   async uploadImage(file) {
     const form = new FormData();
     form.append('file', file);
-    return toResult(await fetch(API.UPLOAD, { method: 'POST', body: form }));
+    const response = await fetch(API.UPLOAD, { method: 'POST', body: form });
+    return toResult(response);
   },
 };

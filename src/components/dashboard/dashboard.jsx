@@ -334,7 +334,12 @@ export default function Dashboard({ initialConfig }) {
       </div>
 
       {pwOpen ? (
-        <PasswordPrompt onSubmit={submitPassword} onCancel={cancelPassword} error={pwError} busy={pwBusy} />
+        <PasswordPrompt
+          onSubmit={submitPassword}
+          onCancel={cancelPassword}
+          error={pwError}
+          busy={pwBusy}
+        />
       ) : null}
 
       {dialog ? (

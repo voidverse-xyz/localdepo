@@ -1,7 +1,9 @@
 // PostCSS config (ESM — the package is "type": "module").
-export default {
+const postcssConfig = {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
   },
 };
+
+export default postcssConfig;

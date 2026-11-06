@@ -40,7 +40,8 @@ export async function POST(request) {
     return json({ error: 'unsupported file type' }, HTTP.UNSUPPORTED_MEDIA);
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
   if (buffer.length > UPLOAD.MAX_BYTES) {
     return json({ error: 'file too large' }, HTTP.PAYLOAD_TOO_LARGE);
   }

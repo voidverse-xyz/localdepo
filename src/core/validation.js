@@ -135,38 +135,38 @@ export function sanitizeBackground(incoming, current) {
   const layer = (key) =>
     incoming?.[key] && typeof incoming[key] === 'object' ? incoming[key] : {};
 
-  const c = layer('color');
-  const i = layer('image');
-  const e = layer('effect');
-  const o = layer('overlay');
+  const color = layer('color');
+  const image = layer('image');
+  const effect = layer('effect');
+  const overlay = layer('overlay');
 
   return {
     color: {
-      enabled: asBool(c.enabled, current.color.enabled),
+      enabled: asBool(color.enabled, current.color.enabled),
       value:
-        typeof c.value === 'string' && c.value.length <= MAX_COLOR_LENGTH
-          ? c.value
+        typeof color.value === 'string' && color.value.length <= MAX_COLOR_LENGTH
+          ? color.value
           : current.color.value,
     },
     image: {
-      enabled: asBool(i.enabled, current.image.enabled),
+      enabled: asBool(image.enabled, current.image.enabled),
       // Only images served from our own /uploads route — never external URLs.
       path:
-        typeof i.path === 'string' && (i.path === '' || UPLOAD_PATH.test(i.path))
-          ? i.path
+        typeof image.path === 'string' && (image.path === '' || UPLOAD_PATH.test(image.path))
+          ? image.path
           : current.image.path,
-      fit: IMAGE_FITS.includes(i.fit) ? i.fit : current.image.fit,
-      blur: asNumber(i.blur, 0, MAX_BLUR, current.image.blur),
+      fit: IMAGE_FITS.includes(image.fit) ? image.fit : current.image.fit,
+      blur: asNumber(image.blur, 0, MAX_BLUR, current.image.blur),
     },
     effect: {
-      enabled: asBool(e.enabled, current.effect.enabled),
-      type: EFFECT_TYPES.includes(e.type) ? e.type : current.effect.type,
-      options: sanitizeEffectOptions(e.options, current.effect.options),
+      enabled: asBool(effect.enabled, current.effect.enabled),
+      type: EFFECT_TYPES.includes(effect.type) ? effect.type : current.effect.type,
+      options: sanitizeEffectOptions(effect.options, current.effect.options),
     },
     overlay: {
-      enabled: asBool(o.enabled, current.overlay.enabled),
-      dim: asNumber(o.dim, 0, 1, current.overlay.dim),
-      blur: asNumber(o.blur, 0, MAX_BLUR, current.overlay.blur),
+      enabled: asBool(overlay.enabled, current.overlay.enabled),
+      dim: asNumber(overlay.dim, 0, 1, current.overlay.dim),
+      blur: asNumber(overlay.blur, 0, MAX_BLUR, current.overlay.blur),
     },
   };
 }

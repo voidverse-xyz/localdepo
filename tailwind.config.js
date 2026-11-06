@@ -4,7 +4,7 @@
 // be re-enabled once components are fully migrated to utilities. The theme
 // mirrors the CSS custom properties in globals.css so utilities use the same
 // design tokens (e.g. `bg-surface`, `text-muted`, `border-line`, `rounded`).
-export default {
+const tailwindConfig = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   corePlugins: {
     preflight: false,
@@ -39,3 +39,5 @@ export default {
   },
   plugins: [],
 };
+
+export default tailwindConfig;

@@ -5,7 +5,7 @@ import { RotateCcw } from 'lucide-react';
 import Modal from '@/components/ui/modal.jsx';
 import Slider from '@/components/ui/slider.jsx';
 import { STRINGS, IMAGE_FIT } from '@/core/constants.js';
-import { listEffects, getEffect } from '@/components/backgrounds/effects/registry.js';
+import { listEffects, getEffect, getEffectDefaults } from '@/components/backgrounds/effects/registry.js';
 import { api } from '@/lib/api.js';
 
 /** A labelled, toggleable group of controls for one background layer. */
@@ -48,15 +48,14 @@ export default function BackgroundPanel({ background, onChange, onSave, onClose 
   };
 
   const setEffectType = (type) => {
-    const def = getEffect(type);
-    update('effect', { type, options: def?.defaults || {} });
+    update('effect', { type, options: getEffectDefaults(type) });
   };
 
   const setEffectOption = (key, value) =>
     update('effect', { options: { ...bg.effect.options, [key]: value } });
 
   const resetEffect = () =>
-    update('effect', { options: { ...(getEffect(bg.effect.type)?.defaults || {}) } });
+    update('effect', { options: getEffectDefaults(bg.effect.type) });
 
   return (
     <Modal
@@ -80,7 +79,11 @@ export default function BackgroundPanel({ background, onChange, onSave, onClose 
         </>
       }
     >
-      <Section label="Background color" enabled={bg.color.enabled} onToggle={(v) => update('color', { enabled: v })}>
+      <Section
+        label={STRINGS.BACKGROUND_COLOR}
+        enabled={bg.color.enabled}
+        onToggle={(v) => update('color', { enabled: v })}
+      >
         <input
           type="color"
           value={bg.color.value}
@@ -88,12 +91,16 @@ export default function BackgroundPanel({ background, onChange, onSave, onClose 
         />
       </Section>
 
-      <Section label="Background image" enabled={bg.image.enabled} onToggle={(v) => update('image', { enabled: v })}>
+      <Section
+        label={STRINGS.BACKGROUND_IMAGE}
+        enabled={bg.image.enabled}
+        onToggle={(v) => update('image', { enabled: v })}
+      >
         <input type="file" accept="image/*" onChange={onUpload} />
-        {uploading ? <span className="panel-hint">Uploading…</span> : null}
+        {uploading ? <span className="panel-hint">{STRINGS.UPLOADING}</span> : null}
         {bg.image.path ? <span className="panel-hint">{bg.image.path}</span> : null}
         <label className="field-inline">
-          Fit
+          {STRINGS.IMAGE_FIT}
           <select value={bg.image.fit} onChange={(e) => update('image', { fit: e.target.value })}>
             {Object.values(IMAGE_FIT).map((f) => (
               <option key={f} value={f}>
@@ -102,12 +109,22 @@ export default function BackgroundPanel({ background, onChange, onSave, onClose 
             ))}
           </select>
         </label>
-        <Slider label="Blur" min={0} max={20} value={bg.image.blur} onChange={(v) => update('image', { blur: v })} />
+        <Slider
+          label={STRINGS.BLUR}
+          min={0}
+          max={20}
+          value={bg.image.blur}
+          onChange={(v) => update('image', { blur: v })}
+        />
       </Section>
 
-      <Section label="Effect" enabled={bg.effect.enabled} onToggle={(v) => update('effect', { enabled: v })}>
+      <Section
+        label={STRINGS.EFFECT}
+        enabled={bg.effect.enabled}
+        onToggle={(v) => update('effect', { enabled: v })}
+      >
         <label className="field-inline">
-          Type
+          {STRINGS.EFFECT_TYPE}
           <select value={bg.effect.type} onChange={(e) => setEffectType(e.target.value)}>
             {listEffects().map((o) => (
               <option key={o.key} value={o.key}>
@@ -133,9 +150,26 @@ export default function BackgroundPanel({ background, onChange, onSave, onClose 
         </button>
       </Section>
 
-      <Section label="Readability overlay" enabled={bg.overlay.enabled} onToggle={(v) => update('overlay', { enabled: v })}>
-        <Slider label="Dim" min={0} max={1} step={0.05} value={bg.overlay.dim} onChange={(v) => update('overlay', { dim: v })} />
-        <Slider label="Blur" min={0} max={20} value={bg.overlay.blur} onChange={(v) => update('overlay', { blur: v })} />
+      <Section
+        label={STRINGS.READABILITY_OVERLAY}
+        enabled={bg.overlay.enabled}
+        onToggle={(v) => update('overlay', { enabled: v })}
+      >
+        <Slider
+          label={STRINGS.DIM}
+          min={0}
+          max={1}
+          step={0.05}
+          value={bg.overlay.dim}
+          onChange={(v) => update('overlay', { dim: v })}
+        />
+        <Slider
+          label={STRINGS.BLUR}
+          min={0}
+          max={20}
+          value={bg.overlay.blur}
+          onChange={(v) => update('overlay', { blur: v })}
+        />
       </Section>
     </Modal>
   );

@@ -85,11 +85,21 @@ export default function ServiceEditDialog({ initial, theme, error, onSave, onCan
     >
       <label className="form-label">
         {STRINGS.FIELD_NAME}
-        <input className="field" value={form.name} onChange={set('name')} autoFocus />
+        <input
+          className="field"
+          value={form.name}
+          onChange={set('name')}
+          autoFocus
+        />
       </label>
       <label className="form-label">
         {STRINGS.FIELD_URL}
-        <input className="field" value={form.url} onChange={set('url')} placeholder="http://host:port" />
+        <input
+          className="field"
+          value={form.url}
+          onChange={set('url')}
+          placeholder="http://host:port"
+        />
       </label>
       <div className="form-label">
         {STRINGS.FIELD_ICON}
@@ -100,10 +110,20 @@ export default function ServiceEditDialog({ initial, theme, error, onSave, onCan
           ) : (
             <span className="icon-preview icon-preview--empty" />
           )}
-          <input className="field" value={form.icon} onChange={set('icon')} placeholder="https://…/icon.png" />
+          <input
+            className="field"
+            value={form.icon}
+            onChange={set('icon')}
+            placeholder="https://…/icon.png"
+          />
           <label className="btn btn--ghost icon-upload">
             <Upload size={14} /> {uploading ? STRINGS.UPLOADING : STRINGS.UPLOAD_ICON}
-            <input type="file" accept="image/*" hidden onChange={onIconUpload} />
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={onIconUpload}
+            />
           </label>
         </div>
       </div>
