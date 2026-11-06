@@ -18,6 +18,7 @@ export function mergeDiscovered(existing, discovered, dismissed = []) {
     if (dismissedIds.has(item.id)) continue;
     if (existingUrls.has(item.url)) continue;
     merged.push(item);
+    existingIds.add(item.id);
     existingUrls.add(item.url);
   }
   return merged;

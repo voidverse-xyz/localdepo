@@ -1,4 +1,5 @@
 import os from 'node:os';
+import { isIPv4 } from 'node:net';
 import { ENV, SCAN } from '../constants.js';
 
 /** "255.255.255.0" -> 24 */
@@ -38,10 +39,13 @@ export function detectCidr() {
  * prefixes <= 30). Capped at `max` to keep scans bounded.
  */
 export function expandCidr(cidr, max = SCAN.MAX_HOSTS) {
-  if (typeof cidr !== 'string' || !cidr.includes('/')) return [];
-  const [ip, prefixStr] = cidr.split('/');
-  const prefix = parseInt(prefixStr, 10);
-  if (Number.isNaN(prefix) || prefix < 0 || prefix > 32) return [];
+  if (typeof cidr !== 'string') return [];
+  const parts = cidr.split('/');
+  if (parts.length !== 2) return [];
+  const [ip, prefixStr] = parts;
+  if (!isIPv4(ip) || !/^\d{1,2}$/.test(prefixStr)) return [];
+  const prefix = Number(prefixStr);
+  if (prefix > 32) return [];
 
   const base = (ipToInt(ip) & maskFromPrefix(prefix)) >>> 0;
   const size = 2 ** (32 - prefix);

@@ -35,3 +35,25 @@ test('expandCidr rejects malformed input', () => {
   assert.deepEqual(expandCidr('not-a-cidr'), []);
   assert.deepEqual(expandCidr('192.168.1.0/40'), []);
 });
+
+test('expandCidr rejects invalid addresses and partially parsed prefixes', () => {
+  for (const cidr of [
+    '999.0.0.1/32',
+    '192.0.2/24',
+    'example.test/24',
+    '192.0.2.0/24junk',
+    '192.0.2.0/24/1',
+    '192.0.2.0/24.5',
+    '192.0.2.0/-1',
+    '192.0.2.0/',
+    null,
+  ]) {
+    assert.deepEqual(expandCidr(cidr), [], String(cidr));
+  }
+});
+
+test('expandCidr includes both /31 endpoints and the sole /32 host', () => {
+  assert.deepEqual(expandCidr('192.0.2.0/31'), ['192.0.2.0', '192.0.2.1']);
+  assert.deepEqual(expandCidr('192.0.2.5/32'), ['192.0.2.5']);
+  assert.deepEqual(expandCidr('0.0.0.0/0', 2), ['0.0.0.1', '0.0.0.2']);
+});
