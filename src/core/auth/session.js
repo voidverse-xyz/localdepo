@@ -34,11 +34,11 @@ export function verifyToken(token) {
   if (lastDot < 0) return false;
 
   const payload = token.slice(0, lastDot);
-  const signature = token.slice(lastDot + 1);
-  const expected = sign(payload);
+  const signature = Buffer.from(token.slice(lastDot + 1));
+  const expected = Buffer.from(sign(payload));
 
   if (signature.length !== expected.length) return false;
-  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return false;
+  if (!crypto.timingSafeEqual(signature, expected)) return false;
 
   const exp = parseInt(payload.split('.')[1], 10);
   return Boolean(exp) && exp >= Math.floor(Date.now() / 1000);

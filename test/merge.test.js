@@ -30,3 +30,17 @@ test('preserves manual services', () => {
   assert.equal(merged.length, 3);
   assert.ok(merged.find((s) => s.id === 'm1'));
 });
+
+test('keeps the first new service when a discovery batch repeats an id', () => {
+  const first = { id: 'service', url: 'http://first.test', name: 'First' };
+  const duplicate = { id: 'service', url: 'http://second.test', name: 'Second' };
+
+  assert.deepEqual(mergeDiscovered([], [first, duplicate]), [first]);
+});
+
+test('keeps the first new service when a discovery batch repeats a url', () => {
+  const first = { id: 'first', url: 'http://service.test', name: 'First' };
+  const duplicate = { id: 'second', url: first.url, name: 'Second' };
+
+  assert.deepEqual(mergeDiscovered([], [first, duplicate]), [first]);
+});
