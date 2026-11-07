@@ -1,0 +1,177 @@
+/**
+ * Single source of truth for app-wide strings, enums, defaults, and config.
+ * Nothing else in the codebase should hard-code these values.
+ */
+
+export const APP = {
+  NAME: 'LocalDepo',
+  TAGLINE: 'Self-hosted service dashboard',
+};
+
+/** Environment variable names (read server-side only). */
+export const ENV = {
+  ADMIN_PASSWORD: 'ADMIN_PASSWORD',
+  SESSION_SECRET: 'SESSION_SECRET',
+  SCAN_CIDR: 'SCAN_CIDR',
+  DATA_DIR: 'DATA_DIR',
+};
+
+/** Filesystem defaults (resolved by core/storage/paths.js). */
+export const STORAGE = {
+  DEFAULT_DATA_DIR: '/data',
+  CONFIG_FILENAME: 'config.json',
+  UPLOADS_DIRNAME: 'uploads',
+  CONFIG_VERSION: 1,
+};
+
+/** View modes for the dashboard. */
+export const VIEW_MODE = {
+  GRID: 'grid',
+  LIST: 'list',
+};
+export const VIEW_MODES = Object.values(VIEW_MODE);
+
+/** Where a service came from. */
+export const SERVICE_SOURCE = {
+  DISCOVERED: 'discovered',
+  MANUAL: 'manual',
+};
+
+/** URL scheme used to reach a service. */
+export const SCHEME = {
+  HTTP: 'http',
+  HTTPS: 'https',
+};
+
+/** How a background image fills the viewport. */
+export const IMAGE_FIT = {
+  COVER: 'cover',
+  CONTAIN: 'contain',
+  TILE: 'tile',
+  CENTER: 'center',
+};
+
+/** Built-in background effect keys (registry keys live in components/backgrounds/effects). */
+export const EFFECT = {
+  NONE: 'none',
+  STARFIELD: 'starfield',
+  RAIN: 'rain',
+};
+
+/** Network scan tuning. */
+export const SCAN = {
+  TCP_TIMEOUT_MS: 800,
+  HTTP_TIMEOUT_MS: 2500,
+  CONCURRENCY: 64,
+  MAX_HOSTS: 1024, // safety cap so a huge CIDR can't blow up
+};
+
+/** Session cookie config. */
+export const SESSION = {
+  COOKIE_NAME: 'localdepo_session',
+  TTL_SECONDS: 60 * 60 * 24 * 7, // 7 days
+};
+
+/** Login brute-force throttling: lock a client out after too many failures. */
+export const LOGIN = {
+  MAX_FAILURES: 10,
+  WINDOW_MS: 15 * 60 * 1000,
+};
+
+/** API route paths (used by the client fetch layer). */
+export const API = {
+  AUTH: '/api/auth',
+  SERVICES: '/api/services',
+  SCAN: '/api/scan',
+  LAYOUT: '/api/layout',
+  SETTINGS: '/api/settings',
+  UPLOAD: '/api/upload',
+};
+
+/** Grid configuration (single controlled layout, free placement). */
+export const GRID = {
+  // 10 columns so a default 5-column tile is 50% of the grid width (≈ 50% of
+  // the viewport, up to the MAX_WIDTH cap).
+  COLUMNS: 10,
+  ROW_HEIGHT: 84,
+  MARGIN: [14, 14],
+  DEFAULT_TILE: { w: 5, h: 2 },
+  MIN_TILE: { minW: 1, minH: 1 },
+  // Cap the grid width so tiles shrink on smaller screens but never grow past
+  // this on larger ones (column width = MAX_WIDTH / COLUMNS at most).
+  MAX_WIDTH: 1120,
+};
+
+/** UI theme keys. */
+export const THEME = {
+  SYSTEM: 'system', // follow the browser's prefers-color-scheme
+  DARK: 'dark',
+  LIGHT: 'light',
+};
+export const THEMES = Object.values(THEME);
+
+/** Upload constraints for background images. */
+export const UPLOAD = {
+  MAX_BYTES: 8 * 1024 * 1024, // 8 MB
+  ALLOWED_MIME: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif'],
+};
+
+/** User-facing strings (centralized for consistency + future i18n). */
+export const STRINGS = {
+  EDIT: 'Edit',
+  DONE: 'Done',
+  ADD_SERVICE: 'Add service',
+  EDIT_SERVICE: 'Edit service',
+  DELETE: 'Delete',
+  SAVE: 'Save',
+  CANCEL: 'Cancel',
+  CLOSE: 'Close',
+  SCAN_NOW: 'Scan network',
+  SETTINGS: 'Background',
+  RESET_EFFECT: 'Reset effect',
+  TOGGLE_THEME: 'Toggle light/dark',
+  SHOW_CONTROLS: 'Controls',
+  UNLOCK: 'Unlock',
+  PASSWORD_TITLE: 'Admin password',
+  PASSWORD_PLACEHOLDER: 'Enter admin password',
+  WRONG_PASSWORD: 'Incorrect password',
+  NO_SERVICES: 'No services yet. Scan the network or add one.',
+  GRID_EMPTY: "No services on the grid yet. Switch to the list and use 'Add to grid'.",
+  SEARCH: 'Search services…',
+  NO_MATCHES: 'No matches.',
+  ADD_TO_GRID: 'Add to grid',
+  REMOVE_FROM_GRID: 'Remove from grid',
+  VIEW_GRID: 'Grid',
+  VIEW_LIST: 'List',
+  FIELD_NAME: 'Name',
+  FIELD_URL: 'URL',
+  FIELD_ICON: 'Icon',
+  FIELD_BG_COLOR: 'Background color',
+  FIELD_FG_COLOR: 'Text color',
+  FIELD_BG_OPACITY: 'Background opacity',
+  COLORS_DEFAULT: 'Default',
+  UPLOAD_ICON: 'Upload icon',
+  UPLOADING: 'Uploading…',
+  BACKGROUND_COLOR: 'Background color',
+  BACKGROUND_IMAGE: 'Background image',
+  IMAGE_FIT: 'Fit',
+  BLUR: 'Blur',
+  EFFECT: 'Effect',
+  EFFECT_TYPE: 'Type',
+  READABILITY_OVERLAY: 'Readability overlay',
+  DIM: 'Dim',
+  CONFIRM_DELETE: 'Delete this service?',
+  FORM_REQUIRED: 'Name and URL are required',
+  SAVE_FAILED: 'Save failed',
+};
+
+/** HTTP status codes used by API routes. */
+export const HTTP = {
+  OK: 200,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  PAYLOAD_TOO_LARGE: 413,
+  TOO_MANY_REQUESTS: 429,
+  UNSUPPORTED_MEDIA: 415,
+  SERVER_ERROR: 500,
+};

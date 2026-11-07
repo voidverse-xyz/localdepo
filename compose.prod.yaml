@@ -1,0 +1,20 @@
+# Standalone production configuration:
+# docker compose -f compose.prod.yaml up -d --build
+services:
+    app:
+        build:
+            context: ./
+            dockerfile: Containerfile
+        # Host networking allows automatic discovery of the host's LAN subnet.
+        network_mode: host
+        volumes:
+            - ./data:/data
+        environment:
+            - NODE_ENV=production
+            - DATA_DIR=/data
+            - ADMIN_PASSWORD=${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+            - SESSION_SECRET=${SESSION_SECRET:?Set SESSION_SECRET in .env}
+            - SCAN_CIDR=${SCAN_CIDR:-}
+            - PORT=${PORT:-3000}
+        restart: unless-stopped
+        stop_grace_period: 40s
