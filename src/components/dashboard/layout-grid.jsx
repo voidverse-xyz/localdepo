@@ -1,6 +1,6 @@
 'use client';
 
-import RGL, { WidthProvider } from 'react-grid-layout';
+import RGL, { WidthProvider } from 'react-grid-layout/legacy';
 import { GRID } from '@/core/constants.js';
 import ServiceTile from './service-tile.jsx';
 

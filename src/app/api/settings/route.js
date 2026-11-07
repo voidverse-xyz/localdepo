@@ -14,7 +14,8 @@ export async function GET() {
  * current config with every field validated/clamped (see sanitizeBackground).
  */
 export async function PUT(request) {
-  if (!isAuthed()) return unauthorized();
+  const authed = await isAuthed();
+  if (!authed) return unauthorized();
   const { body, error } = await readJson(request);
   if (error) return error;
   if (!body?.background || typeof body.background !== 'object') {

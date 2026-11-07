@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 // Cap the device-pixel-ratio so very high-DPI screens don't render 3-4x the pixels.
 const MAX_DPR = 2;
@@ -17,7 +17,9 @@ const MAX_FRAME_DT = 0.05;
 export function useCanvasAnimation(draw, deps = []) {
   const canvasRef = useRef(null);
   const drawRef = useRef(draw);
-  drawRef.current = draw;
+  useLayoutEffect(() => {
+    drawRef.current = draw;
+  }, [draw]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

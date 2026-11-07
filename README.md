@@ -88,6 +88,9 @@ then register it in `src/components/backgrounds/effects/registry.js`.
 
 ## Development
 
+The app uses Next.js 16, React 19, and Tailwind CSS 4. Local tooling requires
+Node.js 22 or newer; the container images supply Node.js 22.
+
 Everything runs through Docker (no host Node required). The dev compose builds
 `Containerfile.local` and runs `next dev`; **Compose watch** syncs your edits into
 the running container for hot reload:
@@ -111,6 +114,17 @@ Run the unit tests in the running development service:
 
 ```bash
 docker compose exec app npm test
+```
+
+HTTP integration tests cover authentication, service/layout persistence, and
+uploaded-image routes. Run these only against a disposable test instance: they
+change its grid layout and leave an uploaded test image behind.
+
+```bash
+docker compose exec \
+  -e TEST_BASE_URL=http://127.0.0.1:3000 \
+  -e TEST_ADMIN_PASSWORD='<test-admin-password>' \
+  app npm run test:integration
 ```
 
 To include fake services for discovery testing:
@@ -141,6 +155,11 @@ apply automatic style fixes, then review the diff. To check through Docker:
 ```bash
 docker compose run --rm --build app npm run lint
 ```
+
+Lint rules live in `eslint.config.mjs`. ESLint stays on the latest 9.x release
+while `eslint-plugin-react` does not support ESLint 10. The scoped `minimatch`
+override keeps TypeScript-ESLint's transitive matcher on a patched release until
+its declared dependency range includes that release.
 
 > Note: this repo's working directory is on a filesystem that doesn't support
 > symlinks, so `npm install` against a bind mount fails. Dependency install and

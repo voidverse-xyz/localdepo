@@ -15,7 +15,8 @@ const TYPE_BY_EXT = {
 
 /** Serve a background image from the data volume (outside Next's public dir). */
 export async function GET(_request, { params }) {
-  const name = path.basename(params.file); // basename strips any path traversal
+  const { file } = await params;
+  const name = path.basename(file); // basename strips any path traversal
   const filePath = path.join(uploadsDir(), name);
   try {
     const data = await fs.readFile(filePath);

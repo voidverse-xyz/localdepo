@@ -8,7 +8,8 @@ export const maxDuration = 120;
 
 /** Run a network scan and merge newly discovered services into the config. */
 export async function POST() {
-  if (!isAuthed()) return unauthorized();
+  const authed = await isAuthed();
+  if (!authed) return unauthorized();
   try {
     const discovered = await scanNetwork();
     let added = 0;

@@ -10,20 +10,31 @@
     "start": "next start",
     "lint": "eslint --ext .js,.jsx,.mjs src test *.js *.mjs --max-warnings=0",
     "lint:fix": "npm run lint -- --fix",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "test:integration": "node --test test/integration/*.test.js"
   },
   "dependencies": {
-    "lucide-react": "0.460.0",
-    "next": "14.2.35",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-grid-layout": "1.5.0"
+    "lucide-react": "1.70.0",
+    "next": "16.4.5",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-grid-layout": "2.3.0"
   },
   "devDependencies": {
-    "autoprefixer": "10.4.20",
-    "eslint": "8.57.1",
-    "eslint-config-next": "14.2.35",
-    "postcss": "8.5.16",
-    "tailwindcss": "3.4.14"
+    "@eslint/js": "9.39.5",
+    "@tailwindcss/postcss": "4.3.5",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.5",
+    "globals": "17.14.0",
+    "postcss": "8.5.32",
+    "tailwindcss": "4.3.5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.5"
+    }
   }
 }

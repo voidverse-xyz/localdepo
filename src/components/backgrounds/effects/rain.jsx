@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useRef } from 'react';
 import { useCanvasAnimation } from '@/hooks/use-canvas-animation.js';
 import { rand } from '@/lib/math.js';
 import { EFFECT } from '@/core/constants.js';
@@ -23,10 +23,11 @@ function makeDrop(width, y) {
 function Rain({ options }) {
   const { density = 0.6, speed = 1, wind = 1.5 } = options;
   const slant = wind - 1.5;
-  const state = useMemo(() => ({ drops: [], w: 0, h: 0 }), []);
+  const stateRef = useRef({ drops: [], w: 0, h: 0 });
 
   const ref = useCanvasAnimation(
     (ctx, { width, height, dt }) => {
+      const state = stateRef.current;
       if (state.w !== width || state.h !== height || state.drops.length === 0) {
         state.w = width;
         state.h = height;

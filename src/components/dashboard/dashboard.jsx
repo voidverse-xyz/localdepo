@@ -1,6 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useRef,
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+  useSyncExternalStore,
+} from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { STRINGS, VIEW_MODE, THEME } from '@/core/constants.js';
 import { api } from '@/lib/api.js';
@@ -16,6 +24,13 @@ import ServiceList from './service-list.jsx';
 // How long to wait after the last layout tweak before persisting it, so a burst
 // of drag/resize events collapses into a single save.
 const LAYOUT_SAVE_DEBOUNCE_MS = 600;
+const SYSTEM_THEME_QUERY = '(prefers-color-scheme: dark)';
+
+function subscribeToSystemTheme(onChange) {
+  const media = window.matchMedia(SYSTEM_THEME_QUERY);
+  media.addEventListener('change', onChange);
+  return () => media.removeEventListener('change', onChange);
+}
 
 /**
  * Top-level client orchestrator. Owns dashboard state (services, view mode,
@@ -33,11 +48,17 @@ export default function Dashboard({ initialConfig }) {
   // without depending on it — that keeps them stable so memoized list rows
   // don't all re-render on every add/remove.
   const layoutRef = useRef(layout);
-  layoutRef.current = layout;
+  useLayoutEffect(() => {
+    layoutRef.current = layout;
+  }, [layout]);
   const [background, setBackground] = useState(initialConfig.background);
   // 'system' (default) follows the OS preference; 'dark'/'light' force a theme.
   const [theme, setTheme] = useState(initialConfig.ui?.theme || THEME.SYSTEM);
-  const [systemDark, setSystemDark] = useState(true); // matched on the client below
+  const systemDark = useSyncExternalStore(
+    subscribeToSystemTheme,
+    () => window.matchMedia(SYSTEM_THEME_QUERY).matches,
+    () => true,
+  );
 
   const [authed, setAuthed] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -64,15 +85,6 @@ export default function Dashboard({ initialConfig }) {
   // Restore an existing session (cookie) so edit mode can skip the prompt.
   useEffect(() => {
     api.checkAuth().then((r) => setAuthed(Boolean(r?.authed))).catch(() => {});
-  }, []);
-
-  // Track the OS colour-scheme so the toggle icon can reflect what 'system' resolves to.
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    setSystemDark(mq.matches);
-    const onChange = (e) => setSystemDark(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
   }, []);
 
   // What the current theme resolves to (system -> the OS preference).

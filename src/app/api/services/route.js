@@ -22,7 +22,8 @@ export async function GET() {
 
 /** Add a manual service. */
 export async function POST(request) {
-  if (!isAuthed()) return unauthorized();
+  const authed = await isAuthed();
+  if (!authed) return unauthorized();
   const { body, error } = await readJson(request);
   if (error) return error;
 
@@ -49,7 +50,8 @@ export async function POST(request) {
 
 /** Edit an existing service (manual or discovered). */
 export async function PUT(request) {
-  if (!isAuthed()) return unauthorized();
+  const authed = await isAuthed();
+  if (!authed) return unauthorized();
   const { body, error } = await readJson(request);
   if (error) return error;
   if (!body?.id) return badRequest('id is required');
@@ -82,7 +84,8 @@ export async function PUT(request) {
 
 /** Delete a service. Discovered services are remembered so a rescan won't re-add them. */
 export async function DELETE(request) {
-  if (!isAuthed()) return unauthorized();
+  const authed = await isAuthed();
+  if (!authed) return unauthorized();
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return badRequest('id is required');
 

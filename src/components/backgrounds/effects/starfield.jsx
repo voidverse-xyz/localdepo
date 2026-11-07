@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useRef } from 'react';
 import { useCanvasAnimation } from '@/hooks/use-canvas-animation.js';
 import { rand } from '@/lib/math.js';
 import { EFFECT } from '@/core/constants.js';
@@ -20,10 +20,11 @@ function makeStar(width, y) {
 /** Slowly drifting, twinkling starfield. Options are supplied by its settings. */
 function Starfield({ options }) {
   const { density = 0.6, speed = 1 } = options;
-  const state = useMemo(() => ({ stars: [], w: 0, h: 0 }), []);
+  const stateRef = useRef({ stars: [], w: 0, h: 0 });
 
   const ref = useCanvasAnimation(
     (ctx, { width, height, dt }) => {
+      const state = stateRef.current;
       if (state.w !== width || state.h !== height || state.stars.length === 0) {
         state.w = width;
         state.h = height;

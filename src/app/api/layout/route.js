@@ -12,7 +12,8 @@ export async function GET() {
 
 /** Persist the tile layout, view mode, and UI prefs (theme). */
 export async function PUT(request) {
-  if (!isAuthed()) return unauthorized();
+  const authed = await isAuthed();
+  if (!authed) return unauthorized();
   const { body, error } = await readJson(request);
   if (error) return error;
   if (!body || typeof body !== 'object') return badRequest();

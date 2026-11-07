@@ -13,7 +13,8 @@ function clientKey(request) {
 
 /** Report whether the current request carries a valid admin session. */
 export async function GET() {
-  return json({ authed: isAuthed() });
+  const authed = await isAuthed();
+  return json({ authed });
 }
 
 /** Log in: verify the password and set the signed session cookie. */

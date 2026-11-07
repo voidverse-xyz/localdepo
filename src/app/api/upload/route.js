@@ -31,7 +31,8 @@ const MAGIC_BY_MIME = {
 
 /** Upload a background image; returns the path used by the image layer. */
 export async function POST(request) {
-  if (!isAuthed()) return unauthorized();
+  const authed = await isAuthed();
+  if (!authed) return unauthorized();
 
   const form = await request.formData();
   const file = form.get('file');
@@ -51,7 +52,9 @@ export async function POST(request) {
 
   const filename = `${randomUUID()}${EXT_BY_MIME[file.type] || ''}`;
   await fs.mkdir(uploadsDir(), { recursive: true });
-  await fs.writeFile(path.join(uploadsDir(), filename), buffer);
+  // Uploaded files belong to the runtime data volume, not the standalone build.
+  const filePath = path.join(/* turbopackIgnore: true */ uploadsDir(), filename);
+  await fs.writeFile(filePath, buffer);
 
   return json({ path: `/uploads/${filename}` });
 }

@@ -40,9 +40,9 @@ services:
                 - path: ./jsconfig.json
                   action: sync+restart
                   target: /app/jsconfig.json
-                - path: ./.eslintrc.json
+                - path: ./eslint.config.mjs
                   action: sync
-                  target: /app/.eslintrc.json
+                  target: /app/eslint.config.mjs
                 - path: ./package.json
                   action: rebuild
                 - path: ./package-lock.json

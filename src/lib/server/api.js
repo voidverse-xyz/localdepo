@@ -5,8 +5,9 @@ import { SESSION, HTTP } from '@/core/constants.js';
 
 /** Server-only helpers shared by every API route (DRY response + auth). */
 
-export function isAuthed() {
-  const token = cookies().get(SESSION.COOKIE_NAME)?.value;
+export async function isAuthed() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION.COOKIE_NAME)?.value;
   return verifyToken(token);
 }
 
