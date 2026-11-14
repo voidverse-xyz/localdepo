@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.agents
+.aws
+.codex
+data
+*.md
+.env*
+Containerfile
+compose*.yaml

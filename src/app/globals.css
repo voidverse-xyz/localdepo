@@ -1,0 +1,638 @@
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css';
+@config '../../tailwind.config.js';
+
+/* Dark is the base theme. */
+:root {
+  color-scheme: dark;
+  --color-text: #e8edf5;
+  --color-text-dim: #9aa7bd;
+  --color-surface: rgba(20, 26, 38, 0.72);
+  --color-surface-solid: #141a26;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-accent: #4f8cff;
+  --color-danger: #ff5c6c;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --gap: 14px;
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Light theme tokens. Applied when the user picks Light explicitly
+   (data-theme="light")... */
+[data-theme='light'] {
+  color-scheme: light;
+  --color-text: #1a2230;
+  --color-text-dim: #5c6779;
+  --color-surface: rgba(255, 255, 255, 0.78);
+  --color-surface-solid: #ffffff;
+  --color-border: rgba(0, 0, 0, 0.12);
+  --color-accent: #2f6bff;
+  --color-danger: #d83a48;
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+}
+
+/* ...and when following the system (no data-theme set) and it prefers light. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --color-text: #1a2230;
+    --color-text-dim: #5c6779;
+    --color-surface: rgba(255, 255, 255, 0.78);
+    --color-surface-solid: #ffffff;
+    --color-border: rgba(0, 0, 0, 0.12);
+    --color-accent: #2f6bff;
+    --color-danger: #d83a48;
+    --shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+/* Tailwind's `border` utility sets width but not style, and Preflight (which
+   normally supplies the default) is off during the migration. Mirror Preflight's
+   rule exactly: zero width + solid style, so an element only shows a border when
+   one is explicitly added. Existing `border` shorthands override both. */
+*,
+::before,
+::after {
+  border-width: 0;
+  border-style: solid;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+/* Always reserve the vertical scrollbar's space. Without this, the scrollbar
+   appears only once the (client-rendered) tiles make the page tall enough,
+   which narrows the content area after first paint — react-grid-layout then
+   re-measures a smaller width and every tile resizes. Reserving the gutter
+   keeps the width constant, so tiles paint once at their final size. */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--color-text);
+  background: #05070c;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* App shell: background layers sit behind, content scrolls above. */
+.app {
+  position: relative;
+  /* dvh tracks the *visible* viewport so iOS Safari's address bar doesn't make
+     100vh taller than the screen (vertical overflow). vh is the fallback. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  z-index: 0;
+}
+
+.app__content {
+  position: relative;
+  z-index: 1;
+  padding: 20px clamp(12px, 4vw, 40px) 60px;
+  /* Hidden for the first frames (see Dashboard `ready`) so the grid can settle
+     off-screen, then fades in to mask the load reflow. */
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.app__content--ready {
+  opacity: 1;
+}
+
+.bg-stack {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bg-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.empty {
+  margin: 80px auto;
+  max-width: 480px;
+  text-align: center;
+  color: var(--color-text-dim);
+}
+/* Empty-grid notice: centered to the viewport via fixed positioning — the same
+   reference frame as the fixed sidebar rail (top:50%), so the text and the rail
+   buttons always line up regardless of the iOS address bar / dvh changes. The
+   inner row is full width and left-aligned, with an arrow pointing at the rail. */
+.grid-empty {
+  position: fixed;
+  inset: 0;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: none; /* it's just a message; never blocks the rail tab */
+}
+.grid-empty__row {
+  margin: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  color: var(--color-text-dim);
+}
+
+/* Reusable button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  backdrop-filter: blur(8px);
+  font-size: 14px;
+}
+/* Hover styles only on real pointers — otherwise a tapped button stays "stuck"
+   hovered on touch, masking state changes (e.g. the grid toggle's border). */
+@media (hover: hover) {
+  .btn:hover {
+    border-color: var(--color-accent);
+  }
+}
+.btn--primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+.btn--danger {
+  color: var(--color-danger);
+  border-color: rgba(255, 92, 108, 0.4);
+}
+.btn--active {
+  border-color: var(--color-accent);
+  color: #fff;
+}
+.btn--ghost {
+  background: transparent;
+}
+/* Square, icon-only button (centers a lucide glyph). */
+.btn--icon {
+  padding: 8px;
+}
+
+/* Grid width cap: full width until MAX_WIDTH, then fixed (tiles don't grow). */
+.layout-wrap {
+  width: 100%;
+}
+
+/* RGL's stylesheet animates every item's width/height with a 200ms transition.
+   On load the tiles settle (hydration -> width measurement) and that transition
+   plays as a glitchy "grow-in". Keep transitions off except in edit mode, where
+   they make drag/resize feel smooth. (.layout--edit is set by LayoutGrid.) */
+.layout:not(.layout--edit) .react-grid-item {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* react-grid-layout: make placeholders match the theme */
+.react-grid-item.react-grid-placeholder {
+  background: var(--color-accent);
+  opacity: 0.25;
+  border-radius: var(--radius);
+}
+
+/* Make the resize handle clearly visible (the default sprite is invisible on
+   dark backgrounds). Higher specificity to beat react-resizable's own CSS. */
+.react-grid-item > .react-resizable-handle {
+  background-image: none;
+  width: 22px;
+  height: 22px;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  cursor: se-resize;
+}
+.react-grid-item > .react-resizable-handle::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 10px;
+  height: 10px;
+  border-right: 3px solid #ffffff;
+  border-bottom: 3px solid #ffffff;
+  border-bottom-right-radius: 3px;
+  filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, 0.7));
+}
+
+/* ---------- Left-edge control rail (no header) ---------- */
+.rail {
+  display: contents; /* tab + panel position themselves; ref still wraps both */
+}
+.rail__tab {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 31;
+  width: 22px;
+  height: 88px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  background: var(--color-surface);
+  color: var(--color-text-dim);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.rail--open .rail__tab {
+  opacity: 0;
+  pointer-events: none;
+}
+.rail__panel {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%) translateX(-112%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 0 14px 14px 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: none;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.rail--open .rail__panel {
+  transform: translateY(-50%) translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.rail__sep {
+  height: 1px;
+  background: var(--color-border);
+  margin: 2px 4px;
+}
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text);
+}
+@media (hover: hover) {
+  .icon-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+.icon-btn--active {
+  background: var(--color-accent);
+  color: #fff;
+}
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Icon ---------- */
+.icon {
+  border-radius: 10px;
+  object-fit: cover;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon--letter {
+  background: linear-gradient(135deg, var(--color-accent), #7b5cff);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ---------- List ---------- */
+.list-wrap {
+  width: 100%;
+  /* Breathing room at the top so the search/first row clears the edge. */
+  padding-top: 12px;
+}
+.list__search {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.list__empty {
+  margin: 28px 0;
+  text-align: center;
+  color: var(--color-text-dim);
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.list__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(8px);
+}
+.list__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.list__name {
+  font-weight: 600;
+  /* Truncate instead of pushing the action buttons off-screen on narrow phones. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.list__actions {
+  display: flex;
+  gap: 6px;
+  /* Keep the action buttons (incl. Add to grid) visible — never clipped. */
+  flex-shrink: 0;
+}
+
+/* ---------- Modal ---------- */
+.modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 20px;
+}
+.modal {
+  width: 100%;
+  max-width: 460px;
+  max-height: 86vh;
+  max-height: 86dvh;
+  overflow: auto;
+  border-radius: var(--radius);
+  background: var(--color-surface-solid);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+}
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+.modal__title {
+  margin: 0;
+  font-size: 16px;
+}
+.modal__x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-dim);
+}
+@media (hover: hover) {
+  .modal__x:hover {
+    color: var(--color-text);
+  }
+}
+.modal__body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.modal__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ---------- Forms ---------- */
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-dim);
+}
+.field {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: #0e1320;
+  color: var(--color-text);
+  font-size: 14px;
+}
+.field:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+.form-error {
+  margin: 8px 0 0;
+  color: var(--color-danger);
+  font-size: 13px;
+}
+.color-row {
+  display: flex;
+  gap: 14px;
+}
+.color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--color-text-dim);
+}
+.color-field__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.color-swatch {
+  width: 38px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+.color-swatch::-webkit-color-swatch-wrapper {
+  padding: 3px;
+}
+.color-swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: 5px;
+}
+.color-field__reset {
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.icon-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.icon-row .field {
+  flex: 1;
+  min-width: 0;
+}
+.icon-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  background: #0e1320;
+  flex: none;
+}
+.icon-preview--empty {
+  display: inline-block;
+}
+.icon-upload {
+  flex: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.field-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--color-text-dim);
+}
+.field-inline select {
+  background: #0e1320;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+}
+
+/* ---------- Background panel ---------- */
+.panel-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+.panel-section__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.panel-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.panel-hint {
+  font-size: 12px;
+  color: var(--color-text-dim);
+  word-break: break-all;
+}
+.reset-btn {
+  align-self: flex-start;
+  font-size: 13px;
+  padding: 6px 10px;
+}
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-text-dim);
+}
+.slider__label {
+  display: flex;
+  justify-content: space-between;
+}
+.slider__label em {
+  font-style: normal;
+  color: var(--color-text);
+}
+.slider input {
+  width: 100%;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+.slider:has(input:disabled) {
+  opacity: 0.5;
+}
+.slider input:disabled {
+  cursor: default;
+}
+
+/* ---------- Background canvas ---------- */
+.bg-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

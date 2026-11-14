@@ -1,0 +1,30 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# runtime data (config + uploads live in a mounted volume)
+/data
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# env
+.env
+.env.*
+!.env.example
+
+# local credentials and agent state
+/.aws/
+/.agents/
+/.codex/
+
+# claude code local settings
+.claude/settings.local.json

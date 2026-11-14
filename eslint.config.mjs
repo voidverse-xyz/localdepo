@@ -1,0 +1,44 @@
+import js from '@eslint/js';
+import globals from 'globals';
+import { defineConfig } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+
+const eslintConfig = defineConfig([
+  js.configs.recommended,
+  ...nextVitals,
+  {
+    files: ['**/*.{js,jsx,mjs}'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+    },
+    rules: {
+      'array-bracket-spacing': ['error', 'never'],
+      'arrow-spacing': 'error',
+      'block-spacing': 'error',
+      'brace-style': ['error', '1tbs', { 'allowSingleLine': true }],
+      'comma-dangle': ['error', 'always-multiline'],
+      'comma-spacing': 'error',
+      'eol-last': 'error',
+      'eqeqeq': ['error', 'always', { 'null': 'ignore' }],
+      'indent': ['error', 2, { 'SwitchCase': 1 }],
+      'key-spacing': 'error',
+      'keyword-spacing': 'error',
+      'no-multiple-empty-lines': ['error', { 'max': 1, 'maxBOF': 0, 'maxEOF': 0 }],
+      'no-trailing-spaces': 'error',
+      'no-unused-vars': ['error', { 'argsIgnorePattern': '^_', 'caughtErrors': 'none' }],
+      'no-var': 'error',
+      'object-curly-spacing': ['error', 'always'],
+      'prefer-const': 'error',
+      'quotes': ['error', 'single', { 'avoidEscape': true }],
+      'semi': ['error', 'always'],
+      'space-infix-ops': 'error',
+      'react/jsx-closing-bracket-location': 'error',
+      'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
+      'react/jsx-indent': ['error', 2],
+      'react/jsx-indent-props': ['error', 2],
+      'react/jsx-max-props-per-line': ['error', { 'maximum': { 'single': 3, 'multi': 1 } }],
+    },
+  },
+]);
+
+export default eslintConfig;
